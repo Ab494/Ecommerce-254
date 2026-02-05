@@ -266,12 +266,13 @@ export default function BulkImport() {
   const handleBulkImport = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/products/bulk-import", {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/products/bulk-import`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(SAMPLE_PRODUCTS),
+        body: JSON.stringify({ products: SAMPLE_PRODUCTS }),
       });
 
       const data = await response.json();

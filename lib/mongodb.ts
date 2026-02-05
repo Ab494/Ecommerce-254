@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
-}
-
 let cached = global.mongoose;
 
 if (!cached) {
@@ -13,6 +9,13 @@ if (!cached) {
 }
 
 async function dbConnect() {
+  // Return early if MONGODB_URI is not configured
+  // This allows the frontend to work without MongoDB when using external backend
+  if (!MONGODB_URI) {
+    console.warn('MONGODB_URI not defined - using external backend API');
+    return null;
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
@@ -33,3 +36,6 @@ async function dbConnect() {
 }
 
 export default dbConnect;
+
+// Named export for backward compatibility
+export { dbConnect as connectDB };

@@ -42,10 +42,11 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
     setError('');
 
     try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const uploadFormData = new FormData();
       uploadFormData.append('file', file);
 
-      const response = await fetch('/api/upload', {
+      const response = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
         body: uploadFormData,
       });
@@ -72,7 +73,8 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
     setError('');
 
     try {
-      const endpoint = initialData ? `/api/products/${initialData._id}` : '/api/products';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const endpoint = initialData ? `${API_URL}/api/products/${initialData._id}` : `${API_URL}/api/products`;
       const method = initialData ? 'PUT' : 'POST';
 
       const response = await fetch(endpoint, {

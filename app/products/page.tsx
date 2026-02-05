@@ -1,121 +1,150 @@
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Smartphone, Video, Home, Printer, ArrowRight } from "lucide-react"
-import Link from "next/link"
+'use client';
 
-const categories = [
-  {
-    icon: Smartphone,
-    title: "Electronics",
-    description: "Phones, tablets, laptops, and accessories from leading global brands. Perfect for corporate procurement and office setups.",
-    items: ["Smartphones & Feature Phones", "Laptops & Desktops", "Tablets & iPads", "Phone Accessories", "Computer Peripherals"],
-    color: "from-primary to-primary/80",
-  },
-  {
-    icon: Video,
-    title: "CCTV Surveillance",
-    description: "Complete security solutions for businesses, offices, and residential properties. Professional-grade equipment with installation support.",
-    items: ["IP Cameras", "DVR/NVR Systems", "Outdoor Cameras", "Motion Sensors", "Complete Security Kits"],
-    color: "from-secondary to-secondary/80",
-  },
-  {
-    icon: Home,
-    title: "Home Appliances",
-    description: "Quality appliances for modern offices and homes. Energy-efficient products from trusted manufacturers.",
-    items: ["Refrigerators & Freezers", "Microwaves & Ovens", "Water Dispensers", "Air Conditioners", "Kitchen Appliances"],
-    color: "from-primary to-primary/80",
-  },
-  {
-    icon: Printer,
-    title: "Office Equipment",
-    description: "Essential office supplies and equipment to keep your business running smoothly. Bulk orders welcome.",
-    items: ["Printers & Scanners", "Toners & Cartridges", "Office Furniture", "Stationery Supplies", "Presentation Equipment"],
-    color: "from-secondary to-secondary/80",
-  },
-]
+import { useEffect, useState } from 'react';
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
-export default function ProductsPage() {
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image: string;
+  stock: number;
+}
+
+export default function ProductsListingPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  const categories = [
+    'all',
+    'Electronics',
+    'CCTV Surveillance',
+    'Home Appliances',
+    'Office Equipment',
+  ];
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/products`);
+      if (!response.ok) throw new Error('Failed to fetch products');
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredProducts = selectedCategory === 'all'
+    ? products
+    : products.filter(p => p.category === selectedCategory);
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1">
-        <section className="bg-muted py-16 sm:py-20">
+      <main className="flex-1 bg-muted/30">
+        <section className="bg-primary py-12 text-primary-foreground">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-                Our Product Categories
-              </h1>
-              <p className="mt-4 text-pretty text-lg text-muted-foreground">
-                Explore our comprehensive range of products designed to meet all your business and enterprise needs.
-              </p>
-            </div>
+            <h1 className="text-3xl font-bold">Our Products</h1>
+            <p className="mt-2 text-primary-foreground/80">
+              Browse our complete range of products
+            </p>
           </div>
         </section>
 
-        <section className="py-16 sm:py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid gap-8 md:grid-cols-2">
-              {categories.map((category) => {
-                const Icon = category.icon
-                return (
-                  <Card
-                    key={category.title}
-                    className="group overflow-hidden border-0 bg-background shadow-md transition-all hover:shadow-xl"
-                  >
-                    <CardHeader className={`bg-gradient-to-r ${category.color} text-white`}>
-                      <div className="flex items-center gap-4">
-                        <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-white/20">
-                          <Icon className="h-7 w-7" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-2xl text-white">{category.title}</CardTitle>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                      <CardDescription className="text-base text-muted-foreground">
-                        {category.description}
-                      </CardDescription>
-                      <ul className="mt-6 space-y-2">
-                        {category.items.map((item) => (
-                          <li key={item} className="flex items-center gap-2 text-sm text-foreground">
-                            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                      <Button variant="outline" className="mt-6 w-full gap-2 bg-transparent" asChild>
-                        <Link href="/contact">
-                          Request Quote
-                          <ArrowRight className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-
-            <div className="mt-16 rounded-2xl bg-muted p-8 text-center sm:p-12">
-              <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
-                {"Can't find what you're looking for?"}
-              </h2>
-              <p className="mt-3 text-muted-foreground">
-                We source products from multiple suppliers. Contact us with your specific requirements and we'll provide a custom quote.
-              </p>
-              <Button size="lg" className="mt-6 gap-2" asChild>
-                <Link href="/contact">
-                  Contact Us
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          {/* Category Filter */}
+          <div className="mb-8 flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? 'default' : 'outline'}
+                onClick={() => setSelectedCategory(category)}
+                className="capitalize"
+              >
+                {category === 'all' ? 'All Products' : category}
               </Button>
-            </div>
+            ))}
           </div>
-        </section>
+
+          {/* Products Grid */}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center text-muted-foreground">Loading products...</div>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center text-muted-foreground">
+                No products found in this category.
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredProducts.map((product) => (
+                <Card
+                  key={product._id}
+                  className="overflow-hidden transition-shadow hover:shadow-lg"
+                >
+                  <div className="aspect-square relative bg-muted">
+                    {product.image ? (
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover transition-transform hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-muted-foreground">
+                        No Image
+                      </div>
+                    )}
+                    {product.stock === 0 && (
+                      <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                        Out of Stock
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-4">
+                    <div className="mb-2 text-xs font-medium text-muted-foreground uppercase">
+                      {product.category}
+                    </div>
+                    <h3 className="mb-2 line-clamp-1 font-semibold">{product.name}</h3>
+                    <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
+                      {product.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="font-bold text-lg">
+                        KES {product.price.toLocaleString()}
+                      </div>
+                      <Button
+                        size="sm"
+                        disabled={product.stock === 0}
+                      >
+                        {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
       <Footer />
     </div>
-  )
+  );
 }
