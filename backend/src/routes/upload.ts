@@ -5,6 +5,9 @@ import fs from 'fs';
 
 const router = Router();
 
+// Get the backend URL for full URLs
+const BACKEND_URL = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3001}`;
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req: Request, file: Express.Multer.File, cb: Function) => {
@@ -42,7 +45,7 @@ router.post('/', upload.single('file'), (req: Request, res: Response) => {
     }
 
     // Return the public URL
-    const publicUrl = `/uploads/products/${file.filename}`;
+    const publicUrl = `${BACKEND_URL}/uploads/products/${file.filename}`;
 
     res.json({
       success: true,
@@ -66,7 +69,7 @@ router.post('/multiple', upload.array('files', 10), (req: Request, res: Response
 
     const uploadedFiles = files.map((file) => ({
       success: true,
-      url: `/uploads/products/${file.filename}`,
+      url: `${BACKEND_URL}/uploads/products/${file.filename}`,
       filename: file.filename,
     }));
 

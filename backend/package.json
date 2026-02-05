@@ -5,8 +5,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
-    "dev:watch": "nodemon --exec ts-node src/index.ts"
+    "dev": "ts-node -r dotenv/config src/index.ts",
+    "dev:watch": "nodemon --exec \"ts-node -r dotenv/config src/index.ts\""
   },
   "dependencies": {
     "axios": "^1.13.4",

@@ -34,8 +34,9 @@ export default function AboutPage() {
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
-        <section className="bg-muted py-16 sm:py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 py-16 sm:py-20">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#64748b08_1px,transparent_1px),linear-gradient(to_bottom,#64748b08_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30" />
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
               <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
                 About 254 Convex Comm LTD

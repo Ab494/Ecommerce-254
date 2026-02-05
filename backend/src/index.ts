@@ -2,12 +2,14 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import path from 'path';
 
 // Routes
 import productsRouter from './routes/products';
 import ordersRouter from './routes/orders';
 import paymentsRouter from './routes/payments';
 import uploadRouter from './routes/upload';
+import authRouter from './routes/auth';
 
 dotenv.config();
 
@@ -34,6 +36,7 @@ app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/auth', authRouter);
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: Function) => {
@@ -51,6 +54,9 @@ async function startServer() {
   try {
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB');
+
+    // Serve uploaded files
+    app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);

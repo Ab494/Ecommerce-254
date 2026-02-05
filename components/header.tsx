@@ -3,8 +3,10 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
-import { Menu, X } from "lucide-react"
+import { Menu, X, ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useCart } from "@/lib/cart-context"
+import { usePathname } from "next/navigation"
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -15,6 +17,10 @@ const navLinks = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { items } = useCart()
+  const pathname = usePathname()
+
+  const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0)
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -46,6 +52,17 @@ export function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
+          <Link 
+            href="/cart" 
+            className="relative p-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ShoppingCart className="h-5 w-5" />
+            {cartItemCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-xs font-bold text-primary-foreground flex items-center justify-center">
+                {cartItemCount}
+              </span>
+            )}
+          </Link>
           <Button variant="outline" asChild>
             <Link href="/contact">Request a Quote</Link>
           </Button>
@@ -68,12 +85,24 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary"
+                className={`block py-2 text-sm font-medium transition-colors ${
+                  pathname === link.href ? "text-primary" : "text-muted-foreground hover:text-primary"
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.label}
               </Link>
             ))}
+            <div className="flex items-center gap-3 pt-2 border-t border-border mt-4">
+              <Link 
+                href="/cart" 
+                className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Cart ({cartItemCount})
+              </Link>
+            </div>
             <Button className="w-full mt-4" asChild>
               <Link href="/contact">Request a Quote</Link>
             </Button>

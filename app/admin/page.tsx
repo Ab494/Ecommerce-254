@@ -1,18 +1,36 @@
+'use client';
+
 import ProductsList from '@/components/admin/products-list';
 import BulkImport from '@/components/admin/bulk-import';
+import AdminProtected from '@/components/admin/admin-protected';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/lib/auth-context';
+import { useRouter } from 'next/navigation';
 
-export const metadata = {
-  title: '254 Convex Comm LTD | Admin Dashboard',
-  description: 'Manage products, orders, and inventory',
-};
+function AdminDashboardContent() {
+  const { logout } = useAuth();
+  const router = useRouter();
 
-export default function AdminDashboard() {
+  const handleLogout = async () => {
+    await logout();
+    router.push('/admin/login');
+  };
+
   return (
     <main className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage your products and orders</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground mb-2">Admin Dashboard</h1>
+            <p className="text-muted-foreground">Manage your products and orders</p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={handleLogout}
+            className="border-slate-300"
+          >
+            Logout
+          </Button>
         </div>
 
         <div className="grid gap-8">
@@ -24,5 +42,13 @@ export default function AdminDashboard() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function AdminDashboard() {
+  return (
+    <AdminProtected>
+      <AdminDashboardContent />
+    </AdminProtected>
   );
 }

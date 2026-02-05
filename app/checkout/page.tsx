@@ -14,6 +14,7 @@ export default function CheckoutPage() {
   const { items, total, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -41,7 +42,7 @@ export default function CheckoutPage() {
       }
 
       // Create order
-      const orderResponse = await fetch('/api/orders', {
+      const orderResponse = await fetch(`${API_URL}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -56,11 +57,14 @@ export default function CheckoutPage() {
         }),
       });
 
-      if (!orderResponse.ok) throw new Error('Failed to create order');
+      if (!orderResponse.ok) {
+        const errorData = await orderResponse.json();
+        throw new Error(errorData.error || 'Failed to create order');
+      }
       const order = await orderResponse.json();
 
       // Initiate M-Pesa payment
-      const paymentResponse = await fetch('/api/payments/initiate', {
+      const paymentResponse = await fetch(`${API_URL}/api/payments/initiate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -70,7 +74,10 @@ export default function CheckoutPage() {
         }),
       });
 
-      if (!paymentResponse.ok) throw new Error('Failed to initiate payment');
+      if (!paymentResponse.ok) {
+        const errorData = await paymentResponse.json();
+        throw new Error(errorData.error || 'Failed to initiate payment. Please check your M-Pesa configuration.');
+      }
       
       clearCart();
       router.push(`/order-confirmation/${order._id}`);

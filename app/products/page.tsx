@@ -6,6 +6,9 @@ import { Footer } from '@/components/footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useCart } from '@/lib/cart-context';
+import { useToast } from '@/hooks/use-toast';
 
 interface Product {
   _id: string;
@@ -14,6 +17,7 @@ interface Product {
   price: number;
   category: string;
   image: string;
+  images: string[];
   stock: number;
 }
 
@@ -21,6 +25,9 @@ export default function ProductsListingPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const { addItem } = useCart();
+  const { toast } = useToast();
+  const router = useRouter();
 
   const categories = [
     'all',
@@ -48,6 +55,26 @@ export default function ProductsListingPage() {
     }
   };
 
+  const handleAddToCart = (product: Product, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    addItem({
+      productId: product._id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      image: product.image,
+      category: product.category,
+    });
+    toast({
+      title: 'Added to Cart',
+      description: `${product.name} has been added to your cart.`,
+    });
+  };
+
+  const handleProductClick = (productId: string) => {
+    router.push(`/products/${productId}`);
+  };
+
   const filteredProducts = selectedCategory === 'all'
     ? products
     : products.filter(p => p.category === selectedCategory);
@@ -55,11 +82,11 @@ export default function ProductsListingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1 bg-muted/30">
-        <section className="bg-primary py-12 text-primary-foreground">
+      <main className="flex-1 bg-slate-50">
+        <section className="bg-slate-900 py-12 text-white">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h1 className="text-3xl font-bold">Our Products</h1>
-            <p className="mt-2 text-primary-foreground/80">
+            <p className="mt-2 text-slate-400">
               Browse our complete range of products
             </p>
           </div>
@@ -73,7 +100,11 @@ export default function ProductsListingPage() {
                 key={category}
                 variant={selectedCategory === category ? 'default' : 'outline'}
                 onClick={() => setSelectedCategory(category)}
-                className="capitalize"
+                className={`capitalize ${
+                  selectedCategory === category 
+                    ? 'bg-slate-900 hover:bg-slate-800' 
+                    : 'border-slate-300 text-slate-700 hover:bg-slate-100'
+                }`}
               >
                 {category === 'all' ? 'All Products' : category}
               </Button>
@@ -96,19 +127,31 @@ export default function ProductsListingPage() {
               {filteredProducts.map((product) => (
                 <Card
                   key={product._id}
-                  className="overflow-hidden transition-shadow hover:shadow-lg"
+                  className="overflow-hidden transition-all hover:shadow-lg cursor-pointer group"
+                  onClick={() => handleProductClick(product._id)}
                 >
-                  <div className="aspect-square relative bg-muted">
+                  <div className="aspect-square relative bg-slate-100">
                     {product.image ? (
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-cover transition-transform hover:scale-105"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                      />
+                      <>
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-cover transition-transform group-hover:scale-105"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                        />
+                        {/* Multi-image indicator */}
+                        {product.images && product.images.length > 1 && (
+                          <div className="absolute top-2 left-2 bg-white/90 px-2 py-1 rounded-full text-xs font-medium text-slate-700 flex items-center gap-1">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            {product.images.length + 1} photos
+                          </div>
+                        )}
+                      </>
                     ) : (
-                      <div className="flex h-full items-center justify-center text-muted-foreground">
+                      <div className="flex h-full items-center justify-center text-slate-400">
                         No Image
                       </div>
                     )}
@@ -117,22 +160,32 @@ export default function ProductsListingPage() {
                         Out of Stock
                       </div>
                     )}
+                    {/* Quick view overlay */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <span className="bg-white text-slate-900 px-4 py-2 rounded-full text-sm font-medium transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                        Quick View
+                      </span>
+                    </div>
                   </div>
                   <CardContent className="p-4">
-                    <div className="mb-2 text-xs font-medium text-muted-foreground uppercase">
+                    <div className="mb-2 text-xs font-medium text-slate-500 uppercase">
                       {product.category}
                     </div>
-                    <h3 className="mb-2 line-clamp-1 font-semibold">{product.name}</h3>
-                    <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
+                    <h3 className="mb-2 line-clamp-1 font-semibold text-slate-900 group-hover:text-primary transition-colors">
+                      {product.name}
+                    </h3>
+                    <p className="mb-3 line-clamp-2 text-sm text-slate-500">
                       {product.description}
                     </p>
                     <div className="flex items-center justify-between">
-                      <div className="font-bold text-lg">
-                        KES {product.price.toLocaleString()}
+                      <div className="font-bold text-lg text-slate-900">
+                        KSh {product.price.toLocaleString()}
                       </div>
                       <Button
                         size="sm"
+                        onClick={(e) => handleAddToCart(product, e)}
                         disabled={product.stock === 0}
+                        className="bg-slate-900 hover:bg-slate-800"
                       >
                         {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
                       </Button>

@@ -11,6 +11,7 @@ interface Product {
   category: string;
   stock: number;
   image: string;
+  images: string[];
 }
 
 export default function ProductsList() {
