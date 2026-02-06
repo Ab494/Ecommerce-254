@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Smartphone, Video, Home, Printer } from "lucide-react"
+import { Smartphone, Video, Home, MessageCircle, Phone, Globe } from "lucide-react"
 
 const segments = [
   {
@@ -21,9 +21,9 @@ const segments = [
     color: "text-primary",
   },
   {
-    icon: Printer,
-    title: "Office Stationery",
-    description: "Printers, toners, cartridges, and all essential office supplies for seamless operations.",
+    icon: MessageCircle,
+    title: "VAS Services",
+    description: "Bulk SMS, Airtime Purchase, Paybill Hosting & Digital Solutions for your business.",
     color: "text-secondary",
   },
 ]
@@ -37,10 +37,10 @@ export function BusinessSegments() {
             Business Segments
           </span>
           <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Comprehensive Product Categories
+            Products & Services
           </h2>
           <p className="mt-4 text-pretty text-muted-foreground">
-            We offer a wide range of products across four key business segments to meet all your enterprise needs.
+            We offer a wide range of products and value-added services to meet all your enterprise needs.
           </p>
         </div>
 

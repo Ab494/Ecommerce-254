@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Header } from '@/components/header';
@@ -30,6 +30,21 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const thumbnailRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll thumbnail to selected image
+  useEffect(() => {
+    if (thumbnailRef.current && product && images.length > 1) {
+      const thumbnail = thumbnailRef.current.children[selectedImageIndex] as HTMLElement;
+      if (thumbnail) {
+        thumbnail.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center'
+        });
+      }
+    }
+  }, [selectedImageIndex]);
 
   useEffect(() => {
     if (params.id) {
@@ -157,11 +172,11 @@ export default function ProductDetailPage() {
                 />
                 
                 {/* Navigation Arrows */}
-                {images.length > 1 && (
+                {images.length > 0 && (
                   <>
                     <button
                       onClick={() => setSelectedImageIndex(prev => (prev > 0 ? prev - 1 : images.length - 1))}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-all"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-all z-10"
                     >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -169,7 +184,7 @@ export default function ProductDetailPage() {
                     </button>
                     <button
                       onClick={() => setSelectedImageIndex(prev => (prev < images.length - 1 ? prev + 1 : 0))}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-all"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-all z-10"
                     >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -179,34 +194,80 @@ export default function ProductDetailPage() {
                 )}
 
                 {/* Image Counter */}
-                {images.length > 1 && (
-                  <div className="absolute bottom-4 right-4 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full">
+                {images.length > 0 && (
+                  <div className="absolute bottom-4 right-4 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full z-10">
                     {selectedImageIndex + 1} / {images.length}
                   </div>
                 )}
               </div>
 
-              {/* Thumbnail Strip */}
+              {/* Thumbnail Strip with Horizontal Scroll */}
               {images.length > 1 && (
-                <div className="flex gap-3 overflow-x-auto pb-2">
-                  {images.map((img, index) => (
+                <div className="relative">
+                  {/* Scroll Left Button */}
+                  {images.length > 2 && (
                     <button
-                      key={index}
-                      onClick={() => setSelectedImageIndex(index)}
-                      className={`relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
-                        index === selectedImageIndex 
-                          ? 'border-primary shadow-md' 
-                          : 'border-slate-200 hover:border-slate-300'
-                      }`}
+                      onClick={() => {
+                        const container = document.getElementById('thumbnail-container');
+                        if (container) container.scrollLeft -= 100;
+                      }}
+                      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-slate-100 transition-all"
                     >
-                      <Image
-                        src={img}
-                        alt={`${product.name} - Thumbnail ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
                     </button>
-                  ))}
+                  )}
+                  
+                  <div 
+                    ref={thumbnailRef}
+                    id="thumbnail-container"
+                    className="flex gap-3 overflow-x-auto pb-2 px-8 scroll-smooth"
+                    style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}
+                  >
+                    {images.map((img, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImageIndex(index)}
+                        className={`relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                          index === selectedImageIndex 
+                            ? 'border-primary shadow-md' 
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <Image
+                          src={img}
+                          alt={`${product.name} - Thumbnail ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                        {/* Thumbnail indicator dots */}
+                        {index === selectedImageIndex && (
+                          <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-b-xl" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  {/* Scroll Right Button */}
+                  {images.length > 2 && (
+                    <button
+                      onClick={() => {
+                        const container = document.getElementById('thumbnail-container');
+                        if (container) container.scrollLeft += 100;
+                      }}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-slate-100 transition-all"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  )}
+                  
+                  {/* Show total images count */}
+                  <div className="text-center mt-2 text-sm text-muted-foreground">
+                    {images.length} images
+                  </div>
                 </div>
               )}
             </div>

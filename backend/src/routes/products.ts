@@ -121,7 +121,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 // POST create new product
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { name, description, price, category, image, stock, sku } = req.body;
+    const { name, description, price, category, image, images, stock, sku } = req.body;
 
     if (!name || !description || !price || !category || !image) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -133,6 +133,7 @@ router.post('/', async (req: Request, res: Response) => {
       price,
       category,
       image,
+      images: images || [],
       stock: stock || 0,
       sku: sku || `SKU-${Date.now()}`,
     });

@@ -42,6 +42,7 @@ export default function ProductsListingPage() {
   }, []);
 
   const fetchProducts = async () => {
+    setLoading(true);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const response = await fetch(`${API_URL}/api/products`);
@@ -50,6 +51,11 @@ export default function ProductsListingPage() {
       setProducts(data);
     } catch (error) {
       console.error('Error fetching products:', error);
+      toast({
+        title: 'Connection Error',
+        description: 'Unable to load products. Please check your connection.',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
