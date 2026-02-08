@@ -15,11 +15,20 @@ interface Product {
   name: string;
   description: string;
   price: number;
+  originalPrice?: number;
+  finalPrice?: number;
+  discountPercent?: number;
+  hasDiscount?: boolean;
   category: string;
   image: string;
   images: string[];
   stock: number;
 }
+
+// Helper function to format Kenyan Shillings
+const formatCurrency = (amount: number): string => {
+  return `KES ${amount.toLocaleString()}`;
+};
 
 export default function ProductsListingPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -66,7 +75,7 @@ export default function ProductsListingPage() {
     addItem({
       productId: product._id,
       name: product.name,
-      price: product.price,
+      price: product.finalPrice || product.price,
       quantity: 1,
       image: product.image,
       category: product.category,
@@ -166,6 +175,12 @@ export default function ProductsListingPage() {
                         Out of Stock
                       </div>
                     )}
+                    {/* Discount badge */}
+                    {product.hasDiscount && (
+                      <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded font-bold">
+                        -{product.discountPercent}%
+                      </div>
+                    )}
                     {/* Quick view overlay */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
                       <span className="bg-white text-slate-900 px-4 py-2 rounded-full text-sm font-medium transform translate-y-2 group-hover:translate-y-0 transition-transform">
@@ -183,10 +198,29 @@ export default function ProductsListingPage() {
                     <p className="mb-3 line-clamp-2 text-sm text-slate-500">
                       {product.description}
                     </p>
+                    
+                    {/* Jumia-style pricing */}
+                    <div className="flex flex-wrap items-baseline gap-2 mb-3">
+                      {product.hasDiscount ? (
+                        <>
+                          <span className="text-lg font-bold text-red-600">
+                            {formatCurrency(product.finalPrice || product.price)}
+                          </span>
+                          <span className="text-sm text-slate-400 line-through">
+                            {formatCurrency(product.originalPrice || product.price)}
+                          </span>
+                          <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded font-medium">
+                            -{product.discountPercent}% OFF
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-lg font-bold text-slate-900">
+                          {formatCurrency(product.price)}
+                        </span>
+                      )}
+                    </div>
+                    
                     <div className="flex items-center justify-between">
-                      <div className="font-bold text-lg text-slate-900">
-                        KSh {product.price.toLocaleString()}
-                      </div>
                       <Button
                         size="sm"
                         onClick={(e) => handleAddToCart(product, e)}

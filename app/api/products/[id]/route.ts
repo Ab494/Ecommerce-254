@@ -19,7 +19,21 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(product);
+    // Add computed discount fields
+    const now = new Date();
+    const hasDiscount = product.discountPercent > 0;
+    const saleStarted = !product.saleStart || new Date(product.saleStart) <= now;
+    const saleEnded = !product.saleEnd || new Date(product.saleEnd) >= now;
+    const isDiscountActive = hasDiscount && saleStarted && saleEnded;
+
+    return NextResponse.json({
+      ...product.toObject(),
+      hasDiscount: isDiscountActive,
+      finalPrice: isDiscountActive 
+        ? product.price * (1 - product.discountPercent / 100) 
+        : product.price,
+      originalPrice: product.price,
+    });
   } catch (error) {
     console.error('Error fetching product:', error);
     return NextResponse.json(
@@ -38,7 +52,32 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const product = await Product.findByIdAndUpdate(id, body, {
+    // Extract discount-related fields
+    const { discountPercent, saleStart, saleEnd, ...updateData } = body;
+
+    // Validate discount if provided
+    if (discountPercent !== undefined && (discountPercent < 0 || discountPercent > 99)) {
+      return NextResponse.json(
+        { error: 'Discount must be between 0 and 99' },
+        { status: 400 }
+      );
+    }
+
+    // Build update object with discount fields
+    const updateObj: any = { ...updateData };
+    
+    if (discountPercent !== undefined) {
+      updateObj.discountPercent = discountPercent;
+      if (discountPercent === 0) {
+        updateObj.saleStart = null;
+        updateObj.saleEnd = null;
+      } else {
+        updateObj.saleStart = saleStart || null;
+        updateObj.saleEnd = saleEnd || null;
+      }
+    }
+
+    const product = await Product.findByIdAndUpdate(id, updateObj, {
       new: true,
       runValidators: true,
     });
@@ -50,7 +89,21 @@ export async function PUT(
       );
     }
 
-    return NextResponse.json(product);
+    // Add computed discount fields
+    const now = new Date();
+    const hasDiscount = product.discountPercent > 0;
+    const saleStarted = !product.saleStart || new Date(product.saleStart) <= now;
+    const saleEnded = !product.saleEnd || new Date(product.saleEnd) >= now;
+    const isDiscountActive = hasDiscount && saleStarted && saleEnded;
+
+    return NextResponse.json({
+      ...product.toObject(),
+      hasDiscount: isDiscountActive,
+      finalPrice: isDiscountActive 
+        ? product.price * (1 - product.discountPercent / 100) 
+        : product.price,
+      originalPrice: product.price,
+    });
   } catch (error) {
     console.error('Error updating product:', error);
     return NextResponse.json(

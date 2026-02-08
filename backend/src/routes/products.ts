@@ -9,6 +9,11 @@ const router = Router();
 // MongoDB connection string (reuse connection from main server)
 const MONGODB_URI = process.env.MONGODB_URI!;
 
+// Helper function to generate unique SKU
+const generateUniqueSKU = (): string => {
+  return `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+};
+
 // Product Schema
 const productSchema = new mongoose.Schema(
   {
@@ -24,6 +29,22 @@ const productSchema = new mongoose.Schema(
     price: {
       type: Number,
       required: true,
+      min: 0,
+    },
+    // Discount fields
+    discountPercent: {
+      type: Number,
+      min: 0,
+      max: 99,
+      default: 0,
+    },
+    saleStart: {
+      type: Date,
+      default: null,
+    },
+    saleEnd: {
+      type: Date,
+      default: null,
     },
     category: {
       type: String,
@@ -42,6 +63,7 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
       default: 0,
+      min: 0,
     },
     sku: {
       type: String,
@@ -55,8 +77,39 @@ const productSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    // Add virtuals and methods
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
+
+// Virtual for final price (applies discount if active)
+productSchema.virtual('finalPrice').get(function(this: any) {
+  const now = new Date();
+  const hasDiscount = this.discountPercent > 0;
+  const saleStarted = !this.saleStart || new Date(this.saleStart) <= now;
+  const saleEnded = !this.saleEnd || new Date(this.saleEnd) >= now;
+  
+  if (hasDiscount && saleStarted && saleEnded) {
+    return this.price * (1 - this.discountPercent / 100);
+  }
+  return this.price;
+});
+
+// Virtual for hasDiscount (check if discount is currently active)
+productSchema.virtual('hasDiscount').get(function(this: any) {
+  const now = new Date();
+  const hasDiscount = this.discountPercent > 0;
+  const saleStarted = !this.saleStart || new Date(this.saleStart) <= now;
+  const saleEnded = !this.saleEnd || new Date(this.saleEnd) >= now;
+  
+  return hasDiscount && saleStarted && saleEnded;
+});
+
+// Virtual for original price (alias for price)
+productSchema.virtual('originalPrice').get(function(this: any) {
+  return this.price;
+});
 
 // Get model or create new one
 const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
@@ -97,7 +150,26 @@ router.get('/', async (req: Request, res: Response) => {
       query = { category };
     }
     const products = await Product.find(query).sort({ createdAt: -1 });
-    res.json(products);
+    
+    // Add computed discount fields to each product
+    const productsWithDiscounts = products.map(product => {
+      const now = new Date();
+      const hasDiscount = product.discountPercent > 0;
+      const saleStarted = !product.saleStart || new Date(product.saleStart) <= now;
+      const saleEnded = !product.saleEnd || new Date(product.saleEnd) >= now;
+      const isDiscountActive = hasDiscount && saleStarted && saleEnded;
+      
+      return {
+        ...product.toObject(),
+        hasDiscount: isDiscountActive,
+        finalPrice: isDiscountActive 
+          ? product.price * (1 - product.discountPercent / 100) 
+          : product.price,
+        originalPrice: product.price,
+      };
+    });
+    
+    res.json(productsWithDiscounts);
   } catch (error) {
     console.error('Error fetching products:', error);
     res.status(500).json({ error: 'Failed to fetch products' });
@@ -111,7 +183,24 @@ router.get('/:id', async (req: Request, res: Response) => {
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
-    res.json(product);
+    
+    // Add computed discount fields
+    const now = new Date();
+    const hasDiscount = product.discountPercent > 0;
+    const saleStarted = !product.saleStart || new Date(product.saleStart) <= now;
+    const saleEnded = !product.saleEnd || new Date(product.saleEnd) >= now;
+    const isDiscountActive = hasDiscount && saleStarted && saleEnded;
+    
+    const productWithDiscount = {
+      ...product.toObject(),
+      hasDiscount: isDiscountActive,
+      finalPrice: isDiscountActive 
+        ? product.price * (1 - product.discountPercent / 100) 
+        : product.price,
+      originalPrice: product.price,
+    };
+    
+    res.json(productWithDiscount);
   } catch (error) {
     console.error('Error fetching product:', error);
     res.status(500).json({ error: 'Failed to fetch product' });
@@ -121,26 +210,83 @@ router.get('/:id', async (req: Request, res: Response) => {
 // POST create new product
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { name, description, price, category, image, images, stock, sku } = req.body;
+    const { 
+      name, 
+      description, 
+      price, 
+      category, 
+      image, 
+      images, 
+      stock, 
+      sku,
+      discountPercent,
+      saleStart,
+      saleEnd
+    } = req.body;
 
     if (!name || !description || !price || !category || !image) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Validate discount
+    if (discountPercent && (discountPercent < 0 || discountPercent > 99)) {
+      return res.status(400).json({ error: 'Discount must be between 0 and 99' });
+    }
+
+    // Validate sale dates
+    if (discountPercent > 0 && saleStart && saleEnd) {
+      const startDate = new Date(saleStart);
+      const endDate = new Date(saleEnd);
+      if (startDate >= endDate) {
+        return res.status(400).json({ error: 'Sale start date must be before sale end date' });
+      }
+    }
+
+    // Calculate final price
+    const finalPrice = discountPercent > 0 
+      ? price * (1 - discountPercent / 100) 
+      : price;
+
+    // Generate or validate SKU
+    let productSku = sku || generateUniqueSKU();
+    
+    // If SKU is provided but already exists, generate a new one
+    if (sku) {
+      const existingProduct = await Product.findOne({ sku: sku });
+      if (existingProduct) {
+        productSku = generateUniqueSKU();
+      }
     }
 
     const product = new Product({
       name,
       description,
       price,
+      discountPercent: discountPercent || 0,
+      saleStart: discountPercent > 0 ? saleStart : null,
+      saleEnd: discountPercent > 0 ? saleEnd : null,
       category,
       image,
       images: images || [],
       stock: stock || 0,
-      sku: sku || `SKU-${Date.now()}`,
+      sku: productSku,
     });
 
     await product.save();
-    res.status(201).json(product);
-  } catch (error) {
+    
+    // Return with computed fields
+    const now = new Date();
+    const hasDiscount = product.discountPercent > 0;
+    const saleStarted = !product.saleStart || new Date(product.saleStart) <= now;
+    const saleEnded = !product.saleEnd || new Date(product.saleEnd) >= now;
+    
+    res.status(201).json({
+      ...product.toObject(),
+      hasDiscount: hasDiscount && saleStarted && saleEnded,
+      finalPrice,
+      originalPrice: price,
+    });
+  } catch (error: any) {
     console.error('Error creating product:', error);
     res.status(500).json({ error: 'Failed to create product' });
   }
@@ -149,15 +295,67 @@ router.post('/', async (req: Request, res: Response) => {
 // PUT update product
 router.put('/:id', async (req: Request, res: Response) => {
   try {
+    const { 
+      discountPercent,
+      saleStart,
+      saleEnd,
+      price,
+      ...updateData 
+    } = req.body;
+
+    // Validate discount if provided
+    if (discountPercent !== undefined && (discountPercent < 0 || discountPercent > 99)) {
+      return res.status(400).json({ error: 'Discount must be between 0 and 99' });
+    }
+
+    // Validate sale dates if discount is being set
+    if (discountPercent > 0 && saleStart && saleEnd) {
+      const startDate = new Date(saleStart);
+      const endDate = new Date(saleEnd);
+      if (startDate >= endDate) {
+        return res.status(400).json({ error: 'Sale start date must be before sale end date' });
+      }
+    }
+
+    // Build update object with discount fields
+    const updateObj: any = { ...updateData };
+    
+    if (discountPercent !== undefined) {
+      updateObj.discountPercent = discountPercent;
+      if (discountPercent === 0) {
+        updateObj.saleStart = null;
+        updateObj.saleEnd = null;
+      } else {
+        updateObj.saleStart = saleStart || updateObj.saleStart || null;
+        updateObj.saleEnd = saleEnd || updateObj.saleEnd || null;
+      }
+    }
+
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateObj,
       { new: true, runValidators: true }
     );
+    
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
-    res.json(product);
+
+    // Return with computed fields
+    const now = new Date();
+    const hasDiscount = product.discountPercent > 0;
+    const saleStarted = !product.saleStart || new Date(product.saleStart) <= now;
+    const saleEnded = !product.saleEnd || new Date(product.saleEnd) >= now;
+    const finalPrice = hasDiscount && saleStarted && saleEnded
+      ? product.price * (1 - product.discountPercent / 100)
+      : product.price;
+    
+    res.json({
+      ...product.toObject(),
+      hasDiscount: hasDiscount && saleStarted && saleEnded,
+      finalPrice,
+      originalPrice: product.price,
+    });
   } catch (error) {
     console.error('Error updating product:', error);
     res.status(500).json({ error: 'Failed to update product' });

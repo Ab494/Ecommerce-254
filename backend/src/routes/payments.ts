@@ -156,13 +156,29 @@ router.post('/callback', async (req: Request, res: Response) => {
         const mpesaReceiptNumber = callbackMetadata?.find((item: any) => item.Name === 'MpesaReceiptNumber')?.Value;
 
         // Find order by checkout request ID and update
-        await Order.findOneAndUpdate(
+        const order = await Order.findOneAndUpdate(
           { mpesaTransactionId: CheckoutRequestID },
           {
             paymentStatus: 'completed',
-            mpesaReceiptNumber,
-          }
+            mpesaReceipt: mpesaReceiptNumber,
+          },
+          { new: true }
         );
+
+        // Generate receipt number
+        if (order) {
+          order.receiptNumber = `RCP-${Date.now()}`;
+          order.receiptSentAt = new Date();
+          await order.save();
+
+          // Log receipt generation
+          console.log('=== AUTO RECEIPT GENERATED ===');
+          console.log(`Order: ${order.orderNumber}`);
+          console.log(`Receipt: ${order.receiptNumber}`);
+          console.log(`M-Pesa Receipt: ${mpesaReceiptNumber}`);
+          console.log(`Amount: KES ${order.totalAmount.toLocaleString()}`);
+          console.log('===============================');
+        }
       } else {
         // Payment failed
         await Order.findOneAndUpdate(

@@ -14,12 +14,21 @@ interface Product {
   name: string;
   description: string;
   price: number;
+  originalPrice?: number;
+  finalPrice?: number;
+  discountPercent?: number;
+  hasDiscount?: boolean;
   category: string;
   image: string;
   images: string[];
   stock: number;
   sku: string;
 }
+
+// Helper function to format Kenyan Shillings
+const formatCurrency = (amount: number): string => {
+  return `KES ${amount.toLocaleString()}`;
+};
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -74,10 +83,12 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     if (!product) return;
 
+    const finalPrice = product.finalPrice || product.price;
+
     addItem({
       productId: product._id,
       name: product.name,
-      price: product.price,
+      price: finalPrice,
       quantity,
       image: product.image,
       category: product.category,
@@ -296,9 +307,28 @@ export default function ProductDetailPage() {
 
                 {/* Price */}
                 <div className="mb-6">
-                  <span className="text-3xl font-bold text-slate-900">
-                    KSh {product.price.toLocaleString()}
-                  </span>
+                  {product.hasDiscount ? (
+                    <div className="space-y-1">
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-3xl font-bold text-red-600">
+                          {formatCurrency(product.finalPrice || product.price)}
+                        </span>
+                        <span className="text-lg text-slate-400 line-through">
+                          {formatCurrency(product.originalPrice || product.price)}
+                        </span>
+                        <span className="bg-red-500 text-white text-sm px-2 py-1 rounded font-medium">
+                          -{product.discountPercent}% OFF
+                        </span>
+                      </div>
+                      <p className="text-sm text-green-600">
+                        You save {formatCurrency((product.price - (product.finalPrice || product.price)) * quantity)}
+                      </p>
+                    </div>
+                  ) : (
+                    <span className="text-3xl font-bold text-slate-900">
+                      {formatCurrency(product.price)}
+                    </span>
+                  )}
                 </div>
 
                 {/* Stock Status */}

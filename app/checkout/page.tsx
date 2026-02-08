@@ -22,6 +22,7 @@ export default function CheckoutPage() {
     shippingAddress: '',
     city: '',
     postalCode: '',
+    paymentMethod: 'mpesa',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +63,13 @@ export default function CheckoutPage() {
         throw new Error(errorData.error || 'Failed to create order');
       }
       const order = await orderResponse.json();
+
+      // If Pay on Delivery, skip M-Pesa and go to confirmation
+      if (formData.paymentMethod === 'pay_on_delivery') {
+        clearCart();
+        router.push(`/order-confirmation/${order._id}`);
+        return;
+      }
 
       // Initiate M-Pesa payment
       const paymentResponse = await fetch(`${API_URL}/api/payments/initiate`, {
@@ -171,8 +179,42 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
+              <div>
+                <h2 className="text-xl font-bold mb-4">Payment Method</h2>
+                <div className="space-y-3">
+                  <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-accent">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="mpesa"
+                      checked={formData.paymentMethod === 'mpesa'}
+                      onChange={handleChange}
+                      className="w-4 h-4"
+                    />
+                    <div className="flex-1">
+                      <span className="font-medium">M-Pesa</span>
+                      <p className="text-sm text-muted-foreground">Pay instantly via M-Pesa STK push</p>
+                    </div>
+                  </label>
+                  <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-accent">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="pay_on_delivery"
+                      checked={formData.paymentMethod === 'pay_on_delivery'}
+                      onChange={handleChange}
+                      className="w-4 h-4"
+                    />
+                    <div className="flex-1">
+                      <span className="font-medium">Pay on Delivery</span>
+                      <p className="text-sm text-muted-foreground">Pay when you receive your order</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
               <Button type="submit" disabled={loading} className="w-full">
-                {loading ? 'Processing...' : 'Proceed to Payment'}
+                {loading ? 'Processing...' : formData.paymentMethod === 'pay_on_delivery' ? 'Place Order' : 'Proceed to Payment'}
               </Button>
             </form>
           </div>

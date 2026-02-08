@@ -15,6 +15,7 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     description: initialData?.description || '',
@@ -24,16 +25,62 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
     sku: initialData?.sku || '',
     image: initialData?.image || '',
     images: initialData?.images || [],
+    // Discount fields
+    discountPercent: initialData?.discountPercent?.toString() || '',
+    saleStart: initialData?.saleStart ? new Date(initialData.saleStart).toISOString().slice(0, 16) : '',
+    saleEnd: initialData?.saleEnd ? new Date(initialData.saleEnd).toISOString().slice(0, 16) : '',
   });
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Calculate live preview
+  const price = parseFloat(formData.price) || 0;
+  const discountPercent = parseFloat(formData.discountPercent) || 0;
+  const finalPrice = price > 0 && discountPercent > 0 
+    ? price * (1 - discountPercent / 100) 
+    : price;
+  const savings = price - finalPrice;
+  const now = new Date();
+  const hasSaleStart = formData.saleStart && new Date(formData.saleStart) <= now;
+  const hasSaleEnd = formData.saleEnd && new Date(formData.saleEnd) >= now;
+  const isSaleActive = discountPercent > 0 && (!formData.saleStart || hasSaleStart) && (!formData.saleEnd || hasSaleEnd);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
+    // Clear validation error when field is updated
+    setValidationErrors(prev => ({ ...prev, [name]: '' }));
+    
     setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
+  };
+
+  // Validate form
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    
+    if (discountPercent < 0 || discountPercent > 99) {
+      errors.discountPercent = 'Discount must be between 0 and 99';
+    }
+    
+    if (discountPercent > 0) {
+      if (formData.saleStart && formData.saleEnd) {
+        const start = new Date(formData.saleStart);
+        const end = new Date(formData.saleEnd);
+        if (start >= end) {
+          errors.saleEnd = 'Sale end date must be after start date';
+        }
+      }
+    }
+    
+    if (finalPrice >= price && discountPercent > 0) {
+      errors.discountPercent = 'Discounted price must be lower than original price';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,6 +164,11 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
     setLoading(true);
     setError('');
 
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const endpoint = initialData ? `${API_URL}/api/products/${initialData._id}` : `${API_URL}/api/products`;
@@ -131,6 +183,9 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
           ...formData,
           price: parseFloat(formData.price),
           stock: parseInt(formData.stock),
+          discountPercent: parseFloat(formData.discountPercent) || 0,
+          saleStart: formData.discountPercent ? (formData.saleStart || null) : null,
+          saleEnd: formData.discountPercent ? (formData.saleEnd || null) : null,
         }),
       });
 
@@ -147,6 +202,9 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
         sku: '',
         image: '',
         images: [],
+        discountPercent: '',
+        saleStart: '',
+        saleEnd: '',
       });
 
       onSuccess?.();
@@ -214,6 +272,88 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
             placeholder="0"
           />
         </div>
+      </div>
+
+      {/* Discount Section */}
+      <div className="bg-slate-50 rounded-lg p-4 space-y-4">
+        <h3 className="font-medium text-slate-900">Sale / Discount</h3>
+        
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Discount (%)</label>
+            <Input
+              type="number"
+              name="discountPercent"
+              value={formData.discountPercent}
+              onChange={handleChange}
+              min="0"
+              max="99"
+              placeholder="0"
+              className={discountPercent > 0 ? 'border-green-500' : ''}
+            />
+            {validationErrors.discountPercent && (
+              <p className="text-xs text-red-500 mt-1">{validationErrors.discountPercent}</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Sale Start</label>
+            <Input
+              type="datetime-local"
+              name="saleStart"
+              value={formData.saleStart}
+              onChange={handleChange}
+              disabled={discountPercent <= 0}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Sale End</label>
+            <Input
+              type="datetime-local"
+              name="saleEnd"
+              value={formData.saleEnd}
+              onChange={handleChange}
+              disabled={discountPercent <= 0}
+            />
+            {validationErrors.saleEnd && (
+              <p className="text-xs text-red-500 mt-1">{validationErrors.saleEnd}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Live Preview */}
+        {price > 0 && (
+          <div className="bg-white rounded-lg p-4 border border-slate-200">
+            <p className="text-sm font-medium text-slate-700 mb-2">Price Preview</p>
+            <div className="flex items-baseline gap-3">
+              <span className="text-2xl font-bold text-green-600">
+                KES {finalPrice.toLocaleString()}
+              </span>
+              {discountPercent > 0 && (
+                <>
+                  <span className="text-lg text-slate-400 line-through">
+                    KES {price.toLocaleString()}
+                  </span>
+                  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    -{discountPercent}% OFF
+                  </span>
+                </>
+              )}
+            </div>
+            {savings > 0 && (
+              <p className="text-sm text-green-600 mt-1">
+                Save KES {savings.toLocaleString()}
+              </p>
+            )}
+            {isSaleActive && (
+              <p className="text-xs text-green-600 mt-2">✓ Sale is active</p>
+            )}
+            {!isSaleActive && discountPercent > 0 && (
+              <p className="text-xs text-yellow-600 mt-2">
+                ⚠ Sale will be active during {formData.saleStart || 'start date'} to {formData.saleEnd || 'end date'}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">

@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import mongoose from 'mongoose';
+import crypto from 'crypto';
 
 const router = Router();
 
@@ -9,6 +10,14 @@ const orderSchema = new mongoose.Schema(
     orderNumber: {
       type: String,
       required: true,
+      unique: true,
+    },
+    invoiceNumber: {
+      type: String,
+      unique: true,
+    },
+    receiptNumber: {
+      type: String,
       unique: true,
     },
     customerName: {
@@ -38,14 +47,19 @@ const orderSchema = new mongoose.Schema(
     postalCode: String,
     paymentStatus: {
       type: String,
-      enum: ['pending', 'processing', 'completed', 'failed'],
+      enum: ['pending', 'processing', 'completed', 'failed', 'on_delivery'],
       default: 'pending',
     },
     paymentMethod: {
       type: String,
+      enum: ['mpesa', 'pay_on_delivery', 'card', 'bank_transfer'],
       default: 'mpesa',
     },
     mpesaTransactionId: String,
+    mpesaReceipt: String,
+    invoiceSentAt: Date,
+    receiptSentAt: Date,
+    notes: String,
   },
   {
     timestamps: true,
@@ -91,6 +105,7 @@ router.post('/', async (req: Request, res: Response) => {
       shippingAddress,
       city,
       postalCode,
+      paymentMethod,
     } = req.body;
 
     if (!customerName || !customerEmail || !customerPhone || !items || !totalAmount) {
@@ -98,9 +113,17 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     const orderNumber = `ORD-${Date.now()}`;
+    const invoiceNumber = `INV-${Date.now()}`;
+
+    // Set payment status based on payment method
+    let paymentStatus = 'pending';
+    if (paymentMethod === 'pay_on_delivery') {
+      paymentStatus = 'on_delivery';
+    }
 
     const order = new Order({
       orderNumber,
+      invoiceNumber,
       customerName,
       customerEmail,
       customerPhone,
@@ -109,7 +132,8 @@ router.post('/', async (req: Request, res: Response) => {
       shippingAddress,
       city,
       postalCode,
-      paymentStatus: 'pending',
+      paymentMethod: paymentMethod || 'mpesa',
+      paymentStatus,
     });
 
     await order.save();

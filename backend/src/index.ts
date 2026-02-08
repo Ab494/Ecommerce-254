@@ -10,6 +10,7 @@ import ordersRouter from './routes/orders';
 import paymentsRouter from './routes/payments';
 import uploadRouter from './routes/upload';
 import authRouter from './routes/auth';
+import invoicesRouter from './routes/invoices';
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use('/api/orders', ordersRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/invoices', invoicesRouter);
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: Function) => {
