@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button"
@@ -45,6 +45,12 @@ function PartnerLogo({ partner }: { partner: typeof partners[0] }) {
 }
 
 export function HeroSection() {
+  const [isPaused, setIsPaused] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Duplicate partners for seamless infinite scroll
+  const duplicatedPartners = [...partners, ...partners, ...partners];
+
   return (
     <>
       <section className="relative overflow-hidden bg-gradient-to-br from-teal-50 via-aqua-50 to-teal-100 py-16 sm:py-20 lg:py-24">
@@ -75,31 +81,57 @@ export function HeroSection() {
         </div>
       </section>
 
-      {/* Partners Section */}
-      <section className="bg-slate-900 py-20 border-b shadow-2xl">
+      {/* Animated Partners Section */}
+      <section 
+        className="bg-slate-900 py-12 border-b relative overflow-hidden"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        {/* Gradient masks for smooth fade edges */}
+        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-slate-900 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-slate-900 to-transparent z-10 pointer-events-none" />
+        
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="inline-block px-6 py-2 rounded-full bg-gradient-to-r from-teal-400 to-emerald-400 text-slate-900 text-sm font-bold mb-4 shadow-lg">
+          <div className="text-center mb-8">
+            <span className="inline-block px-6 py-2 rounded-full bg-gradient-to-r from-teal-400 to-emerald-400 text-slate-900 text-sm font-bold mb-3 shadow-lg">
               OFFICIAL PARTNERS
             </span>
-            <h3 className="text-3xl font-bold text-white">Trusted by Industry Leaders</h3>
-            <p className="text-slate-400 mt-2">We partner with the world's top brands</p>
+            <h3 className="text-2xl font-bold text-white">Trusted by Industry Leaders</h3>
           </div>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-            {partners.map((partner) => (
-              <div
-                key={partner.name}
-                className="group relative"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-teal-500/30 to-emerald-500/30 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
-                <div className="relative flex items-center justify-center px-8 py-6 rounded-xl bg-gradient-to-br from-slate-800 to-slate-700 border border-slate-600 shadow-xl hover:shadow-2xl hover:border-teal-400/50 transition-all duration-300 hover:-translate-y-2">
-                  <PartnerLogo partner={partner} />
+          
+          <div className="overflow-hidden">
+            <div 
+              ref={scrollRef}
+              className="flex gap-8 animate-scroll whitespace-nowrap"
+              style={{ 
+                animationPlayState: isPaused ? 'paused' : 'running',
+              }}
+            >
+              {duplicatedPartners.map((partner, index) => (
+                <div
+                  key={`${partner.name}-${index}`}
+                  className="group relative flex-shrink-0"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-teal-500/20 to-emerald-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
+                  <div className="relative flex items-center justify-center px-8 py-6 rounded-xl bg-gradient-to-br from-slate-800 to-slate-700 border border-slate-600 shadow-xl hover:shadow-2xl hover:border-teal-400/50 transition-all duration-300 hover:-translate-y-2">
+                    <PartnerLogo partner={partner} />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
+
+      <style jsx>{`
+        @keyframes scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-scroll {
+          animation: scroll 30s linear infinite;
+        }
+      `}</style>
     </>
   )
 }

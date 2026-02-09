@@ -1,27 +1,19 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import { v2 as cloudinary } from 'cloudinary';
+import streamifier from 'streamifier';
 
 const router = Router();
 
-// Get the backend URL for full URLs
-const BACKEND_URL = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3001}`;
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req: Request, file: Express.Multer.File, cb: Function) => {
-    const uploadDir = path.join(__dirname, '../../uploads/products');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req: Request, file: Express.Multer.File, cb: Function) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname).replace(/\s+/g, '-'));
-  }
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+// Configure multer for memory storage
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
@@ -35,8 +27,33 @@ const upload = multer({
   }
 });
 
+// Helper function to upload from buffer
+const uploadFromBuffer = (file: Express.Multer.File): Promise<{ url: string; publicId: string }> => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'ecommerce/products',
+        transformation: [
+          { width: 800, height: 800, crop: 'limit' },
+          { quality: 'auto:good' }
+        ]
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else if (result) {
+          resolve({ url: result.secure_url, publicId: result.public_id });
+        } else {
+          reject(new Error('No result from Cloudinary'));
+        }
+      }
+    );
+    streamifier.createReadStream(file.buffer).pipe(uploadStream);
+  });
+};
+
 // POST upload single image
-router.post('/', upload.single('file'), (req: Request, res: Response) => {
+router.post('/', upload.single('file'), async (req: Request, res: Response) => {
   try {
     const file = req.file;
 
@@ -44,13 +61,12 @@ router.post('/', upload.single('file'), (req: Request, res: Response) => {
       return res.status(400).json({ error: 'No file provided' });
     }
 
-    // Return the public URL
-    const publicUrl = `${BACKEND_URL}/uploads/products/${file.filename}`;
+    const result = await uploadFromBuffer(file);
 
     res.json({
       success: true,
-      url: publicUrl,
-      filename: file.filename,
+      url: result.url,
+      publicId: result.publicId,
     });
   } catch (error) {
     console.error('Upload error:', error);
@@ -59,7 +75,7 @@ router.post('/', upload.single('file'), (req: Request, res: Response) => {
 });
 
 // POST upload multiple images
-router.post('/multiple', upload.array('files', 10), (req: Request, res: Response) => {
+router.post('/multiple', upload.array('files', 10), async (req: Request, res: Response) => {
   try {
     const files = req.files as Express.Multer.File[];
 
@@ -67,11 +83,16 @@ router.post('/multiple', upload.array('files', 10), (req: Request, res: Response
       return res.status(400).json({ error: 'No files provided' });
     }
 
-    const uploadedFiles = files.map((file) => ({
-      success: true,
-      url: `${BACKEND_URL}/uploads/products/${file.filename}`,
-      filename: file.filename,
-    }));
+    const uploadedFiles = await Promise.all(
+      files.map(async (file) => {
+        const result = await uploadFromBuffer(file);
+        return {
+          success: true,
+          url: result.url,
+          publicId: result.publicId,
+        };
+      })
+    );
 
     res.json({
       success: true,
@@ -83,14 +104,17 @@ router.post('/multiple', upload.array('files', 10), (req: Request, res: Response
   }
 });
 
-// DELETE delete uploaded file
-router.delete('/:filename', (req: Request, res: Response) => {
+// DELETE delete uploaded file from Cloudinary
+router.delete('/:publicId', async (req: Request, res: Response) => {
   try {
-    const { filename } = req.params;
-    const filepath = path.join(__dirname, '../../uploads/products', filename);
+    const { publicId } = req.params;
 
-    if (fs.existsSync(filepath)) {
-      fs.unlinkSync(filepath);
+    // Decode the publicId if it contains URL-encoded characters
+    const decodedPublicId = decodeURIComponent(publicId);
+
+    const result = await cloudinary.uploader.destroy(decodedPublicId);
+
+    if (result.result === 'ok') {
       res.json({ success: true, message: 'File deleted successfully' });
     } else {
       res.status(404).json({ error: 'File not found' });

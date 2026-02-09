@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Download, FileText } from 'lucide-react';
 
 interface Order {
   _id: string;
@@ -201,6 +202,17 @@ export default function OrderConfirmationPage() {
 
           {/* Actions */}
           <div className="flex gap-4">
+            <Button 
+              variant="outline" 
+              className="flex-1 gap-2" 
+              onClick={() => {
+                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                window.open(`${API_URL}/api/invoices/generate/${order._id}?format=receipt`, '_blank');
+              }}
+            >
+              <Download className="h-4 w-4" />
+              Download Receipt
+            </Button>
             <Link href="/products" className="flex-1">
               <Button variant="outline" className="w-full">
                 Continue Shopping
