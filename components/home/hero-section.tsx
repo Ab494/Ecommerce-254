@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button"
 import { ArrowRight, FileText } from "lucide-react"
 
-// Partner logos - add actual logo images to public/images/partners/
+// Partner logos - add the actual logo images to public/images/partners/
 const partners = [
   { name: 'Vivo', logo: '/images/partners/vivo.png', alt: 'Vivo', fallback: 'Vivo' },
   { name: 'Tecno', logo: '/images/partners/tecno.png', alt: 'Tecno', fallback: 'Tecno' },
