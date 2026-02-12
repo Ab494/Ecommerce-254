@@ -8,7 +8,7 @@ const orderSchema = new mongoose.Schema(
   {
     orderNumber: { type: String, required: true, unique: true },
     invoiceNumber: { type: String, unique: true },
-    receiptNumber: { type: String, unique: true },
+    receiptNumber: String,
     customerName: { type: String, required: true },
     customerEmail: { type: String, required: true },
     customerPhone: { type: String, required: true },
