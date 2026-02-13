@@ -4,14 +4,26 @@ import mongoose from 'mongoose';
 
 const router = Router();
 
-const DARAJA_AUTH_URL = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
-const DARAJA_STK_PUSH_URL = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
-const DARAJA_QUERY_URL = 'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query';
+// Environment-based configuration
+const isSandbox = process.env.MPESA_ENV === 'sandbox' || !process.env.MPESA_ENV;
 
-const consumerKey = process.env.DARAJA_CONSUMER_KEY;
-const consumerSecret = process.env.DARAJA_CONSUMER_SECRET;
-const businessShortcode = process.env.DARAJA_BUSINESS_SHORTCODE;
-const passkey = process.env.DARAJA_PASSKEY;
+const DARAJA_AUTH_URL = isSandbox
+  ? 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+  : 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+
+const DARAJA_STK_PUSH_URL = isSandbox
+  ? 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+  : 'https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query';
+
+const DARAJA_QUERY_URL = isSandbox
+  ? 'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query'
+  : 'https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query';
+
+// Credentials - use sandbox test shortcode for development
+const consumerKey = process.env.DARAJA_CONSUMER_KEY || '';
+const consumerSecret = process.env.DARAJA_CONSUMER_SECRET || '';
+const businessShortcode = process.env.DARAJA_BUSINESS_SHORTCODE || (isSandbox ? '174379' : '');
+const passkey = process.env.DARAJA_PASSKEY || (isSandbox ? 'bfb279f9aa9bdbcf158a97eee74a5584e8ba3f2e47463734d0623d7d3739b151' : '');
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 let accessToken: string | null = null;
@@ -24,16 +36,21 @@ async function getAccessToken() {
 
   const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
 
-  const response = await axios.get(DARAJA_AUTH_URL, {
-    headers: {
-      Authorization: `Basic ${auth}`,
-    },
-  });
+  try {
+    const response = await axios.get(DARAJA_AUTH_URL, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+      },
+    });
 
-  accessToken = response.data.access_token;
-  tokenExpiry = Date.now() + (response.data.expires_in - 60) * 1000;
+    accessToken = response.data.access_token;
+    tokenExpiry = Date.now() + (response.data.expires_in - 60) * 1000;
 
-  return accessToken;
+    return accessToken;
+  } catch (error: any) {
+    console.error('Error getting access token:', error.response?.data || error.message);
+    throw new Error('Failed to get M-Pesa access token');
+  }
 }
 
 function generateTimestamp() {
@@ -91,17 +108,20 @@ router.post('/initiate', async (req: Request, res: Response) => {
 
     const token = await getAccessToken();
     const timestamp = generateTimestamp();
-    const password = generatePassword(
-      businessShortcode!,
-      passkey!,
-      timestamp
-    );
+    const password = generatePassword(businessShortcode, passkey, timestamp);
 
     // Format phone number to 254XXXXXXXXX format
     let formattedPhone = phoneNumber.replace(/^0/, '254');
     if (!formattedPhone.startsWith('254')) {
       formattedPhone = '254' + formattedPhone;
     }
+
+    console.log('=== STK PUSH REQUEST ===');
+    console.log(`Environment: ${isSandbox ? 'Sandbox' : 'Production'}`);
+    console.log(`Shortcode: ${businessShortcode}`);
+    console.log(`Phone: ${formattedPhone}`);
+    console.log(`Amount: ${amount}`);
+    console.log('========================');
 
     const response = await axios.post(
       DARAJA_STK_PUSH_URL,
@@ -116,7 +136,7 @@ router.post('/initiate', async (req: Request, res: Response) => {
         PhoneNumber: formattedPhone,
         CallBackURL: `${process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3001}`}/api/payments/callback`,
         AccountReference: orderId,
-        TransactionDesc: `Payment for order ${orderId}`,
+        TransactionDesc: `Payment for order ${order.orderNumber}`,
       },
       {
         headers: {
@@ -137,61 +157,121 @@ router.post('/initiate', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Error initiating payment:', error.response?.data || error.message);
-    res.status(500).json({ error: 'Failed to initiate payment' });
+    res.status(500).json({ 
+      error: 'Failed to initiate payment',
+      details: error.response?.data?.errorMessage || error.message
+    });
   }
 });
 
-// POST payment callback
+// POST payment callback - handles M-Pesa payment notifications
 router.post('/callback', async (req: Request, res: Response) => {
   try {
-    const { Body } = req.body;
-
-    if (Body?.stkCallback) {
-      const { MerchantRequestID, CheckoutRequestID, ResultCode, ResultDesc } = Body.stkCallback;
-
-      if (ResultCode === 0) {
-        // Payment successful
-        const callbackMetadata = Body.stkCallback.CallbackMetadata;
-        const amount = callbackMetadata?.find((item: any) => item.Name === 'Amount')?.Value;
-        const mpesaReceiptNumber = callbackMetadata?.find((item: any) => item.Name === 'MpesaReceiptNumber')?.Value;
-
-        // Find order by checkout request ID and update
-        const order = await Order.findOneAndUpdate(
-          { mpesaTransactionId: CheckoutRequestID },
-          {
-            paymentStatus: 'completed',
-            mpesaReceipt: mpesaReceiptNumber,
-          },
-          { new: true }
-        );
-
-        // Generate receipt number
-        if (order) {
-          order.receiptNumber = `RCP-${Date.now()}`;
-          order.receiptSentAt = new Date();
-          await order.save();
-
-          // Log receipt generation
-          console.log('=== AUTO RECEIPT GENERATED ===');
-          console.log(`Order: ${order.orderNumber}`);
-          console.log(`Receipt: ${order.receiptNumber}`);
-          console.log(`M-Pesa Receipt: ${mpesaReceiptNumber}`);
-          console.log(`Amount: KES ${order.totalAmount.toLocaleString()}`);
-          console.log('===============================');
-        }
-      } else {
-        // Payment failed
-        await Order.findOneAndUpdate(
-          { mpesaTransactionId: CheckoutRequestID },
-          { paymentStatus: 'failed' }
-        );
-      }
+    console.log('=== PAYMENT CALLBACK RECEIVED ===');
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+    
+    const body = req.body;
+    
+    // Handle different callback formats from M-Pesa partners
+    let ResultCode, ResultDesc, CheckoutRequestID, CallbackMetadata, MerchantRequestID;
+    
+    // Format 1: Standard M-Pesa Daraja API
+    if (body.Body?.stkCallback) {
+      const { stkCallback } = body.Body;
+      ResultCode = stkCallback.ResultCode;
+      ResultDesc = stkCallback.ResultDesc;
+      CheckoutRequestID = stkCallback.CheckoutRequestID;
+      MerchantRequestID = stkCallback.MerchantRequestID;
+      CallbackMetadata = stkCallback.CallbackMetadata;
+    } 
+    // Format 2: Direct callback with Result at top level
+    else if (body.ResultCode !== undefined) {
+      ResultCode = body.ResultCode;
+      ResultDesc = body.ResultDesc;
+      CheckoutRequestID = body.CheckoutRequestID || body.CheckoutRequestId;
+      MerchantRequestID = body.MerchantRequestID || body.MerchantRequestId;
+      CallbackMetadata = body.CallbackMetadata;
+    }
+    // Format 3: Partner custom format
+    else {
+      ResultCode = body.resultCode || body.result_code || body.statusCode || 0;
+      ResultDesc = body.resultDesc || body.result_desc || body.statusMessage || 'Unknown';
+      CheckoutRequestID = body.checkoutRequestId || body.CheckoutRequestId || body.transactionId;
+      MerchantRequestID = body.merchantRequestId || body.MerchantRequestId;
+      CallbackMetadata = body.callbackMetadata || body.metadata;
     }
 
-    res.json({ success: true });
+    console.log('Parsed callback:', { ResultCode, ResultDesc, CheckoutRequestID, MerchantRequestID });
+
+    if (ResultCode === 0 || ResultCode === '0' || ResultCode === null) {
+      // Payment successful
+      let amount, mpesaReceiptNumber, transactionDate, phoneNumber;
+      
+      if (CallbackMetadata) {
+        // Handle array format
+        if (Array.isArray(CallbackMetadata)) {
+          amount = CallbackMetadata.find((item: any) => item.Name === 'Amount')?.Value;
+          mpesaReceiptNumber = CallbackMetadata.find((item: any) => item.Name === 'MpesaReceiptNumber')?.Value;
+          transactionDate = CallbackMetadata.find((item: any) => item.Name === 'TransactionDate')?.Value;
+          phoneNumber = CallbackMetadata.find((item: any) => item.Name === 'PhoneNumber')?.Value;
+        } else {
+          // Handle object format
+          amount = CallbackMetadata.Amount || CallbackMetadata.amount;
+          mpesaReceiptNumber = CallbackMetadata.MpesaReceiptNumber || CallbackMetadata.mpesaReceiptNumber;
+          transactionDate = CallbackMetadata.TransactionDate || CallbackMetadata.transactionDate;
+          phoneNumber = CallbackMetadata.PhoneNumber || CallbackMetadata.phoneNumber;
+        }
+      }
+
+      console.log('Payment success:', { amount, mpesaReceiptNumber, transactionDate, phoneNumber });
+
+      // Find order by checkout request ID or transaction ID
+      const order = await Order.findOneAndUpdate(
+        { 
+          $or: [
+            { mpesaTransactionId: CheckoutRequestID },
+            { mpesaTransactionId: mpesaReceiptNumber }
+          ]
+        },
+        {
+          paymentStatus: 'completed',
+          mpesaReceipt: mpesaReceiptNumber,
+          orderStatus: 'processing',
+        },
+        { new: true }
+      );
+
+      if (order) {
+        // Generate receipt number
+        order.receiptNumber = `RCP-${Date.now()}`;
+        order.receiptSentAt = new Date();
+        await order.save();
+
+        console.log('=== AUTO RECEIPT GENERATED ===');
+        console.log(`Order: ${order.orderNumber}`);
+        console.log(`Receipt: ${order.receiptNumber}`);
+        console.log(`M-Pesa Receipt: ${mpesaReceiptNumber}`);
+        console.log(`Amount: KES ${order.totalAmount.toLocaleString()}`);
+        console.log('===============================');
+      } else {
+        console.log('Order not found for callback:', CheckoutRequestID);
+      }
+    } else {
+      // Payment failed
+      console.log('Payment failed:', ResultDesc);
+      
+      await Order.findOneAndUpdate(
+        { mpesaTransactionId: CheckoutRequestID },
+        { paymentStatus: 'failed' }
+      );
+    }
+
+    // Always respond with success to prevent retries
+    res.json({ success: true, ResultCode: 0 });
   } catch (error) {
     console.error('Error processing callback:', error);
-    res.status(500).json({ success: false });
+    // Still return success to prevent callback retries
+    res.json({ success: true });
   }
 });
 
@@ -202,11 +282,7 @@ router.get('/status/:checkoutRequestId', async (req: Request, res: Response) => 
 
     const token = await getAccessToken();
     const timestamp = generateTimestamp();
-    const password = generatePassword(
-      businessShortcode!,
-      passkey!,
-      timestamp
-    );
+    const password = generatePassword(businessShortcode, passkey, timestamp);
 
     const response = await axios.post(
       DARAJA_QUERY_URL,

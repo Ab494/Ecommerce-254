@@ -16,10 +16,7 @@ const orderSchema = new mongoose.Schema(
       type: String,
       unique: true,
     },
-    receiptNumber: {
-      type: String,
-      unique: true,
-    },
+    receiptNumber: String,
     customerName: {
       type: String,
       required: true,
