@@ -35,6 +35,11 @@ function AdminDashboardContent() {
   useEffect(() => {
     if (activeTab === 'orders') {
       fetchOrders();
+      
+      // Auto-refresh every 10 seconds
+      const interval = setInterval(fetchOrders, 10000);
+      
+      return () => clearInterval(interval);
     }
   }, [activeTab]);
 

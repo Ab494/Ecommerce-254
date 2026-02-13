@@ -259,6 +259,25 @@ router.post('/callback', async (req: Request, res: Response) => {
         console.log(`M-Pesa Receipt: ${mpesaReceiptNumber}`);
         console.log(`Amount: KES ${order.totalAmount.toLocaleString()}`);
         console.log('===============================');
+
+        // Send payment confirmation email automatically
+        try {
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001'}/api/invoices/payment-confirmation/${order._id}`,
+            {
+              paymentDetails: {
+                mpesaReceiptNumber,
+                transactionDate,
+                phoneNumber,
+                amount,
+              }
+            },
+            { timeout: 10000 }
+          );
+          console.log('✅ Payment confirmation email queued');
+        } catch (emailError: any) {
+          console.error('❌ Failed to send payment confirmation:', emailError.message);
+        }
       } else {
         console.log('Order not found for callback:', CheckoutRequestID);
       }

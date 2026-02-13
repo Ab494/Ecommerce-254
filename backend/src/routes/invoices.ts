@@ -1,7 +1,15 @@
 import { Router, Request, Response } from 'express';
 import mongoose from 'mongoose';
+import { Resend } from 'resend';
 
 const router = Router();
+
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Get sender email from environment or use default
+const SENDER_EMAIL = process.env.SENDER_EMAIL || 'orders@254convex.co.ke';
+const COMPANY_NAME = process.env.COMPANY_NAME || '254 Convex Communication LTD';
 
 // Order Schema (copied from orders.ts for consistency)
 const orderSchema = new mongoose.Schema(
@@ -66,9 +74,9 @@ const generateInvoiceHTML = (order: any) => {
             <p style="margin: 8px 0 0 0; color: #64748b;">${order.invoiceNumber}</p>
           </div>
           <div style="text-align: right;">
-            <h2 style="margin: 0; color: #2563eb; font-size: 24px;">TechZone Kenya</h2>
+            <h2 style="margin: 0; color: #2563eb; font-size: 24px;">254 Convex Communication LTD</h2>
             <p style="margin: 8px 0 0 0; color: #64748b;">Nairobi, Kenya</p>
-            <p style="margin: 4px 0 0 0; color: #64748b;">info@techzone.co.ke</p>
+            <p style="margin: 4px 0 0 0; color: #64748b;">orders@254convex.co.ke</p>
           </div>
         </div>
 
@@ -183,7 +191,7 @@ const generateReceiptHTML = (order: any, paymentDetails: any = {}) => {
 
         <div style="text-align: center; margin-top: 24px;">
           <p style="margin: 0 0 8px 0; color: #64748b; font-size: 11px;">Thank you for shopping with</p>
-          <p style="margin: 0; color: #1e293b; font-weight: bold; font-size: 14px;">TechZone Kenya</p>
+          <p style="margin: 0; color: #1e293b; font-weight: bold; font-size: 14px;">254 Convex Communication LTD</p>
         </div>
       </div>
     </body>
@@ -206,6 +214,23 @@ router.post('/send-invoice/:orderId', async (req: Request, res: Response) => {
     console.log(`Subject: Invoice ${order.invoiceNumber}`);
     console.log(`Order: ${order.orderNumber}`);
     console.log(`Amount: KES ${order.totalAmount.toLocaleString()}`);
+    
+    // Send actual email if RESEND_API_KEY is configured
+    if (process.env.RESEND_API_KEY) {
+      try {
+        await resend.emails.send({
+          from: `Invoice <${SENDER_EMAIL}>`,
+          to: [order.customerEmail],
+          subject: `Invoice ${order.invoiceNumber} - ${COMPANY_NAME}`,
+          html: invoiceHTML,
+        });
+        console.log('✅ Invoice email sent successfully!');
+      } catch (emailError: any) {
+        console.error('❌ Failed to send invoice email:', emailError.message);
+      }
+    } else {
+      console.log('⚠️ RESEND_API_KEY not configured - email not sent');
+    }
     console.log('======================');
 
     order.invoiceSentAt = new Date();
@@ -231,13 +256,30 @@ router.post('/send-receipt/:orderId', async (req: Request, res: Response) => {
     }
 
     const receiptHTML = generateReceiptHTML(order, req.body.paymentDetails || {});
-    const receiptNumber = `RCP-${Date.now()}`;
+    const receiptNumber = order.receiptNumber || `RCP-${Date.now()}`;
 
     console.log('=== RECEIPT EMAIL ===');
     console.log(`To: ${order.customerEmail}`);
     console.log(`Subject: Receipt ${receiptNumber}`);
     console.log(`Order: ${order.orderNumber}`);
     console.log(`Amount: KES ${order.totalAmount.toLocaleString()}`);
+    
+    // Send actual email if RESEND_API_KEY is configured
+    if (process.env.RESEND_API_KEY) {
+      try {
+        await resend.emails.send({
+          from: `Receipt <${SENDER_EMAIL}>`,
+          to: [order.customerEmail],
+          subject: `Payment Confirmed - Receipt ${receiptNumber} - ${COMPANY_NAME}`,
+          html: receiptHTML,
+        });
+        console.log('✅ Receipt email sent successfully!');
+      } catch (emailError: any) {
+        console.error('❌ Failed to send receipt email:', emailError.message);
+      }
+    } else {
+      console.log('⚠️ RESEND_API_KEY not configured - email not sent');
+    }
     console.log('======================');
 
     order.receiptNumber = receiptNumber;
@@ -252,6 +294,67 @@ router.post('/send-receipt/:orderId', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error sending receipt:', error);
     res.status(500).json({ error: 'Failed to send receipt' });
+  }
+});
+
+// POST auto-send payment confirmation email (called by payment callback)
+router.post('/payment-confirmation/:orderId', async (req: Request, res: Response) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // Skip if receipt already sent
+    if (order.receiptSentAt) {
+      return res.json({ 
+        success: true, 
+        message: 'Receipt already sent',
+        receiptNumber: order.receiptNumber 
+      });
+    }
+
+    const paymentDetails = req.body.paymentDetails || {};
+    const receiptHTML = generateReceiptHTML(order, paymentDetails);
+    const receiptNumber = `RCP-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+
+    console.log('=== AUTO PAYMENT CONFIRMATION EMAIL ===');
+    console.log(`To: ${order.customerEmail}`);
+    console.log(`Subject: Payment Confirmed - ${receiptNumber}`);
+    console.log(`Order: ${order.orderNumber}`);
+    console.log(`Amount: KES ${order.totalAmount.toLocaleString()}`);
+    
+    // Send actual email if RESEND_API_KEY is configured
+    if (process.env.RESEND_API_KEY) {
+      try {
+        await resend.emails.send({
+          from: `Confirmation <${SENDER_EMAIL}>`,
+          to: [order.customerEmail],
+          subject: `Payment Confirmed - Order ${order.orderNumber} - ${COMPANY_NAME}`,
+          html: receiptHTML,
+        });
+        console.log('✅ Payment confirmation email sent!');
+      } catch (emailError: any) {
+        console.error('❌ Failed to send confirmation email:', emailError.message);
+      }
+    } else {
+      console.log('⚠️ RESEND_API_KEY not configured - email not sent');
+    }
+    console.log('===========================================');
+
+    // Update order with receipt info
+    order.receiptNumber = receiptNumber;
+    order.receiptSentAt = new Date();
+    await order.save();
+
+    res.json({ 
+      success: true, 
+      message: 'Payment confirmation sent',
+      receiptNumber 
+    });
+  } catch (error) {
+    console.error('Error sending payment confirmation:', error);
+    res.status(500).json({ error: 'Failed to send payment confirmation' });
   }
 });
 
