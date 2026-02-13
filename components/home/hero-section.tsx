@@ -7,10 +7,7 @@ import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button"
 import { ArrowRight, FileText } from "lucide-react"
 
-<<<<<<< HEAD
-=======
 // Partner logos - add the actual logo images to public/images/partners/
->>>>>>> 7384323df755808c203b41d01f5d6add9800bb73
 const partners = [
   { name: 'Vivo', logo: '/images/partners/vivo.png', category: 'Smartphones' },
   { name: 'Tecno', logo: '/images/partners/tecno.png', category: 'Smartphones' },
