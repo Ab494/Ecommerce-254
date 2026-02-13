@@ -134,7 +134,7 @@ router.post('/initiate', async (req: Request, res: Response) => {
         PartyA: formattedPhone,
         PartyB: businessShortcode,
         PhoneNumber: formattedPhone,
-        CallBackURL: `${process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3001}`}/api/payments/callback`,
+        CallBackURL: `${process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3001}`}/api/payments/callback`,
         AccountReference: orderId,
         TransactionDesc: `Payment for order ${order.orderNumber}`,
       },
