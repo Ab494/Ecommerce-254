@@ -248,8 +248,8 @@ router.post('/callback', async (req: Request, res: Response) => {
       );
 
       if (order) {
-        // Generate receipt number
-        order.receiptNumber = `RCP-${Date.now()}`;
+        // Generate receipt number (unique)
+        order.receiptNumber = `RCP-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
         order.receiptSentAt = new Date();
         await order.save();
 
