@@ -68,19 +68,19 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4 text-primary" />
-                <span>+254 700 000 000</span>
+                <span>0722745703</span>
               </li>
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4 text-primary" />
-                <span>info@254convexcomm.co.ke</span>
+                <span>254convexcom@gmail.com</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 text-primary mt-0.5" />
-                <span>Nairobi, Kenya</span>
+                <span>Jivern Bharat Building 5th Flr along Harambee Avenue, Nairobi</span>
               </li>
             </ul>
             <Button className="mt-4 gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white" asChild>
-              <a href="https://wa.me/254700000000" target="_blank" rel="noopener noreferrer">
+              <a href="https://wa.me/254722745703" target="_blank" rel="noopener noreferrer">
                 <MessageCircle className="h-4 w-4" />
                 WhatsApp Us
               </a>

@@ -62,7 +62,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">Phone</h3>
-                      <p className="mt-1 text-muted-foreground">+254 700 000 000</p>
+                      <p className="mt-1 text-muted-foreground">0722745703</p>
                     </div>
                   </div>
 
@@ -74,7 +74,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">Email</h3>
-                      <p className="mt-1 text-muted-foreground">info@254convexcomm.co.ke</p>
+                      <p className="mt-1 text-muted-foreground">254convexcom@gmail.com</p>
                     </div>
                   </div>
 
@@ -86,7 +86,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">Location</h3>
-                      <p className="mt-1 text-muted-foreground">Nairobi, Kenya</p>
+                      <p className="mt-1 text-muted-foreground">Jivern Bharat Building 5th Flr along Harambee Avenue, Nairobi</p>
                     </div>
                   </div>
 
@@ -118,7 +118,7 @@ export default function ContactPage() {
                     className="mt-4 w-full gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white"
                     asChild
                   >
-                    <a href="https://wa.me/254700000000" target="_blank" rel="noopener noreferrer">
+                    <a href="https://wa.me/254722745703" target="_blank" rel="noopener noreferrer">
                       <MessageCircle className="h-4 w-4" />
                       Chat on WhatsApp
                     </a>

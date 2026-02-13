@@ -33,7 +33,7 @@ export function CTASection() {
                 className="gap-2 px-8 border-white/30 text-white hover:bg-white/10 bg-transparent"
                 asChild
               >
-                <a href="https://wa.me/254700000000" target="_blank" rel="noopener noreferrer">
+                <a href="https://wa.me/254722745703" target="_blank" rel="noopener noreferrer">
                   WhatsApp Us
                 </a>
               </Button>
