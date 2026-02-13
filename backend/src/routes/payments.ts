@@ -13,7 +13,7 @@ const DARAJA_AUTH_URL = isSandbox
 
 const DARAJA_STK_PUSH_URL = isSandbox
   ? 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-  : 'https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query';
+  : 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
 const DARAJA_QUERY_URL = isSandbox
   ? 'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query'
