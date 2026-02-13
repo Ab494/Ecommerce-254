@@ -156,10 +156,16 @@ router.post('/initiate', async (req: Request, res: Response) => {
       message: 'STK push sent successfully',
     });
   } catch (error: any) {
-    console.error('Error initiating payment:', error.response?.data || error.message);
+    console.error('=== PAYMENT INITIATE ERROR ===');
+    console.error('Error details:', JSON.stringify(error.response?.data || error.message, null, 2));
+    console.error('Full error:', error);
     res.status(500).json({ 
       error: 'Failed to initiate payment',
-      details: error.response?.data?.errorMessage || error.message
+      details: error.response?.data?.errorMessage || error.message,
+      debug: {
+        env: isSandbox ? 'sandbox' : 'production',
+        hasCredentials: !!consumerKey && !!consumerSecret && !!businessShortcode && !!passkey
+      }
     });
   }
 });
