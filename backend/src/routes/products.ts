@@ -295,12 +295,12 @@ router.post('/', async (req: Request, res: Response) => {
 // PUT update product
 router.put('/:id', async (req: Request, res: Response) => {
   try {
-    const { 
+    const {
       discountPercent,
       saleStart,
       saleEnd,
       price,
-      ...updateData 
+      ...updateData
     } = req.body;
 
     // Validate discount if provided
@@ -319,6 +319,11 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     // Build update object with discount fields
     const updateObj: any = { ...updateData };
+    
+    // Include price if provided
+    if (price !== undefined) {
+      updateObj.price = price;
+    }
     
     if (discountPercent !== undefined) {
       updateObj.discountPercent = discountPercent;
