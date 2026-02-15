@@ -2,32 +2,14 @@ services:
   - type: web
     name: ecommerce-backend
     env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
+    buildCommand: npm install
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 3001
-      - key: RESEND_API_KEY
-        sync: false
-      - key: SENDER_EMAIL
-        sync: false
-      - key: COMPANY_NAME
-        sync: false
-      - key: MONGODB_URI
-        sync: false
-      - key: MPESA_ENV
-        value: production
-      - key: DARAJA_CONSUMER_KEY
-        sync: false
-      - key: DARAJA_CONSUMER_SECRET
-        sync: false
-      - key: DARAJA_BUSINESS_SHORTCODE
-        sync: false
-      - key: DARAJA_PASSKEY
-        sync: false
-      - key: BACKEND_URL
-        sync: false
-      - key: FRONTEND_URL
-        sync: false
+      - key: NPM_CONFIG_LOGLEVEL
+        value: error
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=4096

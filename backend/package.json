@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "start": "NODE_OPTIONS='--max-old-space-size=2048' node dist/index.js",
+    "start": "node -r ts-node/register/transpile-only --max-old-space-size=4096 src/index.ts",
     "dev": "ts-node -r dotenv/config src/index.ts",
     "dev:watch": "nodemon --exec \"ts-node -r dotenv/config src/index.ts\""
   },
@@ -17,7 +17,9 @@
     "mongoose": "^9.1.5",
     "multer": "^1.4.5-lts.1",
     "resend": "^6.9.2",
-    "streamifier": "^0.1.1"
+    "streamifier": "^0.1.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
@@ -25,8 +27,6 @@
     "@types/multer": "^1.4.11",
     "@types/node": "^22",
     "@types/streamifier": "^0.1.2",
-    "nodemon": "^3.1.7",
-    "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "nodemon": "^3.1.7"
   }
 }
