@@ -9,13 +9,15 @@ interface CartItem {
   quantity: number;
   image?: string;
   category?: string;
+  variantId?: string;
+  variantColor?: string;
 }
 
 interface CartContextType {
   items: CartItem[];
   addItem: (item: CartItem) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeItem: (productId: string, variantId?: string) => void;
+  updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
   clearCart: () => void;
   total: number;
 }
@@ -42,10 +44,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = (newItem: CartItem) => {
     setItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.productId === newItem.productId);
+      // Check for existing item with same productId AND variantId
+      const existingItem = prevItems.find(
+        (item) => 
+          item.productId === newItem.productId && 
+          item.variantId === newItem.variantId
+      );
       if (existingItem) {
         return prevItems.map((item) =>
-          item.productId === newItem.productId
+          item.productId === newItem.productId && item.variantId === newItem.variantId
             ? { ...item, quantity: item.quantity + newItem.quantity }
             : item
         );
@@ -54,17 +61,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const removeItem = (productId: string) => {
-    setItems((prevItems) => prevItems.filter((item) => item.productId !== productId));
+  const removeItem = (productId: string, variantId?: string) => {
+    setItems((prevItems) => 
+      prevItems.filter((item) => 
+        !(item.productId === productId && item.variantId === variantId)
+      )
+    );
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (productId: string, quantity: number, variantId?: string) => {
     if (quantity <= 0) {
-      removeItem(productId);
+      removeItem(productId, variantId);
     } else {
       setItems((prevItems) =>
         prevItems.map((item) =>
-          item.productId === productId ? { ...item, quantity } : item
+          item.productId === productId && item.variantId === variantId 
+            ? { ...item, quantity } 
+            : item
         )
       );
     }

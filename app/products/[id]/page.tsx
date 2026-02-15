@@ -9,6 +9,15 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/cart-context';
 import { useToast } from '@/hooks/use-toast';
 
+interface ProductVariant {
+  _id?: string;
+  color: string;
+  price?: number | null;
+  stock: number;
+  sku?: string;
+  image?: string | null;
+}
+
 interface Product {
   _id: string;
   name: string;
@@ -23,6 +32,8 @@ interface Product {
   images: string[];
   stock: number;
   sku: string;
+  variants?: ProductVariant[];
+  hasVariants?: boolean;
 }
 
 // Helper function to format Kenyan Shillings
@@ -39,6 +50,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const thumbnailRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll thumbnail to selected image
@@ -72,6 +84,10 @@ export default function ProductDetailPage() {
       if (data.image || (data.images && data.images.length > 0)) {
         setSelectedImageIndex(0);
       }
+      // Set first variant as selected if product has variants
+      if (data.hasVariants && data.variants && data.variants.length > 0) {
+        setSelectedVariant(data.variants[0]);
+      }
     } catch (error) {
       console.error('Error fetching product:', error);
       router.push('/products');
@@ -83,20 +99,40 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     if (!product) return;
 
-    const finalPrice = product.finalPrice || product.price;
+    // Use variant price if selected, otherwise use product price
+    const basePrice = selectedVariant?.price ?? product.price;
+    const finalPrice = product.hasDiscount
+      ? basePrice * (1 - (product.discountPercent || 0) / 100)
+      : basePrice;
+
+    // Get current stock based on variant or product
+    const currentStock = selectedVariant ? selectedVariant.stock : product.stock;
+    
+    if (currentStock < quantity) {
+      toast({
+        title: 'Insufficient Stock',
+        description: `Only ${currentStock} items available.`,
+        variant: 'destructive',
+      });
+      return;
+    }
 
     addItem({
       productId: product._id,
-      name: product.name,
+      name: selectedVariant
+        ? `${product.name} - ${selectedVariant.color}`
+        : product.name,
       price: finalPrice,
       quantity,
-      image: product.image,
+      image: selectedVariant?.image || product.image,
       category: product.category,
+      variantId: selectedVariant?._id,
+      variantColor: selectedVariant?.color,
     });
 
     toast({
       title: 'Added to Cart',
-      description: `${quantity} x ${product.name} added to your cart.`,
+      description: `${quantity} x ${product.name}${selectedVariant ? ` (${selectedVariant.color})` : ''} added to your cart.`,
     });
   };
 
@@ -333,18 +369,61 @@ export default function ProductDetailPage() {
 
                 {/* Stock Status */}
                 <div className="mb-6">
-                  {product.stock > 0 ? (
-                    <span className="inline-flex items-center text-sm text-green-600">
-                      <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                      In Stock ({product.stock} available)
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center text-sm text-red-600">
-                      <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-                      Out of Stock
-                    </span>
-                  )}
+                  {(() => {
+                    const currentStock = selectedVariant ? selectedVariant.stock : product.stock;
+                    return currentStock > 0 ? (
+                      <span className="inline-flex items-center text-sm text-green-600">
+                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                        In Stock ({currentStock} available)
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center text-sm text-red-600">
+                        <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                        Out of Stock
+                      </span>
+                    );
+                  })()}
                 </div>
+
+                {/* Color Variants Selector */}
+                {product.hasVariants && product.variants && product.variants.length > 0 && (
+                  <div className="mb-6">
+                    <label className="block text-sm font-semibold text-slate-900 mb-3">
+                      Color
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {product.variants.map((variant, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setSelectedVariant(variant)}
+                          className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                            selectedVariant?.color === variant.color
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <span className="font-medium">{variant.color}</span>
+                          {variant.price && (
+                            <span className="ml-2 text-sm text-slate-500">
+                              {formatCurrency(variant.price)}
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    {selectedVariant && (
+                      <p className="text-sm text-slate-600 mt-2">
+                        {selectedVariant.stock > 0 ? (
+                          <span className="text-green-600">
+                            {selectedVariant.stock} in stock
+                          </span>
+                        ) : (
+                          <span className="text-red-600">Out of stock</span>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 {/* Description */}
                 <div className="mb-8">
@@ -355,60 +434,69 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* Quantity Selector */}
-                {product.stock > 0 && (
-                  <div className="mb-6">
-                    <label className="block text-sm font-semibold text-slate-900 mb-3">Quantity</label>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50">
-                        <button
-                          onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                          className="w-12 h-12 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-white transition-all rounded-l-xl"
-                        >
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14" />
-                          </svg>
-                        </button>
-                        <span className="w-16 text-center font-semibold text-slate-900">
-                          {quantity}
-                        </span>
-                        <button
-                          onClick={() => setQuantity(prev => Math.min(product.stock, prev + 1))}
-                          className="w-12 h-12 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-white transition-all rounded-r-xl"
-                        >
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                          </svg>
-                        </button>
+                {(() => {
+                  const currentStock = selectedVariant ? selectedVariant.stock : product.stock;
+                  return currentStock > 0 ? (
+                    <div className="mb-6">
+                      <label className="block text-sm font-semibold text-slate-900 mb-3">Quantity</label>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50">
+                          <button
+                            onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                            className="w-12 h-12 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-white transition-all rounded-l-xl"
+                          >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14" />
+                            </svg>
+                          </button>
+                          <span className="w-16 text-center font-semibold text-slate-900">
+                            {quantity}
+                          </span>
+                          <button
+                            onClick={() => setQuantity(prev => Math.min(currentStock, prev + 1))}
+                            className="w-12 h-12 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-white transition-all rounded-r-xl"
+                          >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  ) : null;
+                })()}
 
                 {/* Action Buttons */}
-                {product.stock > 0 ? (
-                  <div className="flex gap-4">
+                {(() => {
+                  const currentStock = selectedVariant ? selectedVariant.stock : product.stock;
+                  if (currentStock > 0) {
+                    return (
+                      <div className="flex gap-4">
+                        <Button
+                          onClick={handleAddToCart}
+                          className="flex-1 h-12 text-base font-semibold bg-slate-100 text-slate-900 hover:bg-slate-200 border border-slate-200"
+                          variant="outline"
+                        >
+                          Add to Cart
+                        </Button>
+                        <Button
+                          onClick={handleBuyNow}
+                          className="flex-1 h-12 text-base font-semibold bg-slate-900 text-white hover:bg-slate-800"
+                        >
+                          Buy Now
+                        </Button>
+                      </div>
+                    );
+                  }
+                  return (
                     <Button
-                      onClick={handleAddToCart}
-                      className="flex-1 h-12 text-base font-semibold bg-slate-100 text-slate-900 hover:bg-slate-200 border border-slate-200"
-                      variant="outline"
+                      disabled
+                      className="w-full h-12 text-base font-semibold bg-slate-200 text-slate-500"
                     >
-                      Add to Cart
+                      Out of Stock
                     </Button>
-                    <Button
-                      onClick={handleBuyNow}
-                      className="flex-1 h-12 text-base font-semibold bg-slate-900 text-white hover:bg-slate-800"
-                    >
-                      Buy Now
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    disabled
-                    className="w-full h-12 text-base font-semibold bg-slate-200 text-slate-500"
-                  >
-                    Out of Stock
-                  </Button>
-                )}
+                  );
+                })()}
 
                 {/* Additional Info */}
                 <div className="mt-8 pt-6 border-t border-slate-100">

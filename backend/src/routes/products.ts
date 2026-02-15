@@ -14,6 +14,36 @@ const generateUniqueSKU = (): string => {
   return `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 };
 
+// Variant Schema (embedded in Product)
+const variantSchema = new mongoose.Schema(
+  {
+    color: {
+      type: String,
+      required: true,
+      enum: ['Black', 'Cyan', 'Magenta', 'Yellow', 'White', 'Red', 'Blue', 'Green', 'Other'],
+    },
+    price: {
+      type: Number,
+      min: 0,
+      default: null, // If null, uses parent product price
+    },
+    stock: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    sku: {
+      type: String,
+      sparse: true,
+    },
+    image: {
+      type: String,
+      default: null, // Optional variant-specific image
+    },
+  },
+  { _id: true }
+);
+
 // Product Schema
 const productSchema = new mongoose.Schema(
   {
@@ -71,6 +101,15 @@ const productSchema = new mongoose.Schema(
       sparse: true,
     },
     featured: {
+      type: Boolean,
+      default: false,
+    },
+    // Color variants
+    variants: {
+      type: [variantSchema],
+      default: [],
+    },
+    hasVariants: {
       type: Boolean,
       default: false,
     },
@@ -210,18 +249,20 @@ router.get('/:id', async (req: Request, res: Response) => {
 // POST create new product
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { 
-      name, 
-      description, 
-      price, 
-      category, 
-      image, 
-      images, 
-      stock, 
+    const {
+      name,
+      description,
+      price,
+      category,
+      image,
+      images,
+      stock,
       sku,
       discountPercent,
       saleStart,
-      saleEnd
+      saleEnd,
+      variants,
+      hasVariants
     } = req.body;
 
     if (!name || !description || !price || !category || !image) {
@@ -243,8 +284,8 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     // Calculate final price
-    const finalPrice = discountPercent > 0 
-      ? price * (1 - discountPercent / 100) 
+    const finalPrice = discountPercent > 0
+      ? price * (1 - discountPercent / 100)
       : price;
 
     // Generate or validate SKU
@@ -258,6 +299,12 @@ router.post('/', async (req: Request, res: Response) => {
       }
     }
 
+    // Process variants - generate SKUs for each variant
+    const processedVariants = (variants || []).map((variant: any) => ({
+      ...variant,
+      sku: variant.sku || `${productSku}-${variant.color?.toUpperCase() || 'VAR'}`,
+    }));
+
     const product = new Product({
       name,
       description,
@@ -270,6 +317,8 @@ router.post('/', async (req: Request, res: Response) => {
       images: images || [],
       stock: stock || 0,
       sku: productSku,
+      variants: processedVariants,
+      hasVariants: hasVariants || processedVariants.length > 0,
     });
 
     await product.save();
@@ -300,6 +349,8 @@ router.put('/:id', async (req: Request, res: Response) => {
       saleStart,
       saleEnd,
       price,
+      variants,
+      hasVariants,
       ...updateData
     } = req.body;
 
@@ -336,6 +387,19 @@ router.put('/:id', async (req: Request, res: Response) => {
       }
     }
 
+    // Handle variants update
+    if (variants !== undefined) {
+      // Get existing product to use its SKU for variant SKUs
+      const existingProduct = await Product.findById(req.params.id);
+      const baseSku = existingProduct?.sku || generateUniqueSKU();
+      
+      updateObj.variants = variants.map((variant: any) => ({
+        ...variant,
+        sku: variant.sku || `${baseSku}-${variant.color?.toUpperCase() || 'VAR'}`,
+      }));
+      updateObj.hasVariants = hasVariants !== undefined ? hasVariants : variants.length > 0;
+    }
+
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       updateObj,
@@ -348,16 +412,16 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     // Return with computed fields
     const now = new Date();
-    const hasDiscount = product.discountPercent > 0;
+    const hasDiscountFlag = product.discountPercent > 0;
     const saleStarted = !product.saleStart || new Date(product.saleStart) <= now;
     const saleEnded = !product.saleEnd || new Date(product.saleEnd) >= now;
-    const finalPrice = hasDiscount && saleStarted && saleEnded
+    const finalPrice = hasDiscountFlag && saleStarted && saleEnded
       ? product.price * (1 - product.discountPercent / 100)
       : product.price;
     
     res.json({
       ...product.toObject(),
-      hasDiscount: hasDiscount && saleStarted && saleEnded,
+      hasDiscount: hasDiscountFlag && saleStarted && saleEnded,
       finalPrice,
       originalPrice: product.price,
     });

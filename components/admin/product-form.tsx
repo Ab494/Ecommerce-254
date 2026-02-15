@@ -29,7 +29,13 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
     discountPercent: initialData?.discountPercent?.toString() || '',
     saleStart: initialData?.saleStart ? new Date(initialData.saleStart).toISOString().slice(0, 16) : '',
     saleEnd: initialData?.saleEnd ? new Date(initialData.saleEnd).toISOString().slice(0, 16) : '',
+    // Variants
+    hasVariants: initialData?.hasVariants || false,
+    variants: initialData?.variants || [],
   });
+
+  // Available colors for variants
+  const colorOptions = ['Black', 'Cyan', 'Magenta', 'Yellow', 'White', 'Red', 'Blue', 'Green', 'Other'];
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -159,6 +165,43 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
     setSelectedImageIndex(index);
   };
 
+  // Variant management functions
+  const addVariant = () => {
+    setFormData(prev => ({
+      ...prev,
+      variants: [...prev.variants, { color: 'Black', price: '', stock: '0' }],
+      hasVariants: true,
+    }));
+  };
+
+  const removeVariant = (index: number) => {
+    setFormData(prev => {
+      const newVariants = [...prev.variants];
+      newVariants.splice(index, 1);
+      return {
+        ...prev,
+        variants: newVariants,
+        hasVariants: newVariants.length > 0,
+      };
+    });
+  };
+
+  const updateVariant = (index: number, field: string, value: any) => {
+    setFormData(prev => {
+      const newVariants = [...prev.variants];
+      newVariants[index] = { ...newVariants[index], [field]: value };
+      return { ...prev, variants: newVariants };
+    });
+  };
+
+  const toggleHasVariants = () => {
+    setFormData(prev => ({
+      ...prev,
+      hasVariants: !prev.hasVariants,
+      variants: !prev.hasVariants ? [{ color: 'Black', price: '', stock: '0' }] : [],
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -186,6 +229,12 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
           discountPercent: parseFloat(formData.discountPercent) || 0,
           saleStart: formData.discountPercent ? (formData.saleStart || null) : null,
           saleEnd: formData.discountPercent ? (formData.saleEnd || null) : null,
+          variants: formData.variants.map((v: any) => ({
+            ...v,
+            price: v.price ? parseFloat(v.price) : null,
+            stock: parseInt(v.stock) || 0,
+          })),
+          hasVariants: formData.hasVariants,
         }),
       });
 
@@ -205,6 +254,8 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
         discountPercent: '',
         saleStart: '',
         saleEnd: '',
+        hasVariants: false,
+        variants: [],
       });
 
       onSuccess?.();
@@ -381,6 +432,86 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
             placeholder="e.g., SKU-001"
           />
         </div>
+      </div>
+
+      {/* Color Variants Section */}
+      <div className="bg-blue-50 rounded-lg p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium text-slate-900">Color Variants</h3>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.hasVariants}
+              onChange={toggleHasVariants}
+              className="rounded border-gray-300"
+            />
+            <span className="text-sm">Enable variants</span>
+          </label>
+        </div>
+
+        {formData.hasVariants && (
+          <div className="space-y-3">
+            {formData.variants.map((variant: any, index: number) => (
+              <div key={index} className="bg-white rounded-lg p-3 border border-slate-200">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium mb-1">Color</label>
+                    <select
+                      value={variant.color}
+                      onChange={(e) => updateVariant(index, 'color', e.target.value)}
+                      className="w-full px-2 py-1 border rounded text-sm"
+                    >
+                      {colorOptions.map((color) => (
+                        <option key={color} value={color}>{color}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium mb-1">Price (optional)</label>
+                    <Input
+                      type="number"
+                      value={variant.price}
+                      onChange={(e) => updateVariant(index, 'price', e.target.value)}
+                      placeholder={`Default: ${formData.price || '0'}`}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium mb-1">Stock</label>
+                    <Input
+                      type="number"
+                      value={variant.stock}
+                      onChange={(e) => updateVariant(index, 'stock', e.target.value)}
+                      placeholder="0"
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeVariant(index)}
+                    className="mt-4 text-red-500 hover:text-red-700 p-1"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            ))}
+            
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addVariant}
+              className="w-full"
+            >
+              + Add Color Variant
+            </Button>
+            
+            <p className="text-xs text-muted-foreground">
+              Add variants for different colors (e.g., Black, Cyan, Magenta, Yellow for printer cartridges)
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Product Images Gallery */}
