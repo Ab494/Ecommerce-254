@@ -8,7 +8,7 @@ const router = Router();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Get sender email from environment or use default
-const SENDER_EMAIL = process.env.SENDER_EMAIL || 'orders@254convex.co.ke';
+const SENDER_EMAIL = process.env.SENDER_EMAIL || 'orders@254convexcomltd.co.ke';
 const COMPANY_NAME = process.env.COMPANY_NAME || '254 Convex Communication LTD';
 
 // Order Schema (copied from orders.ts for consistency)
@@ -76,7 +76,7 @@ const generateInvoiceHTML = (order: any) => {
           <div style="text-align: right;">
             <h2 style="margin: 0; color: #2563eb; font-size: 24px;">254 Convex Communication LTD</h2>
             <p style="margin: 8px 0 0 0; color: #64748b;">Nairobi, Kenya</p>
-            <p style="margin: 4px 0 0 0; color: #64748b;">orders@254convex.co.ke</p>
+            <p style="margin: 4px 0 0 0; color: #64748b;">orders@254convexcomltd.co.ke</p>
           </div>
         </div>
 

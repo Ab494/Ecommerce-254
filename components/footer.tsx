@@ -72,7 +72,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4 text-primary" />
-                <span>254convexcom@gmail.com</span>
+                <span>sales@254convexcomltd.co.ke</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 text-primary mt-0.5" />
