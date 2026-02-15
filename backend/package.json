@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "NODE_OPTIONS='--max-old-space-size=2048' node dist/index.js",
     "dev": "ts-node -r dotenv/config src/index.ts",
     "dev:watch": "nodemon --exec \"ts-node -r dotenv/config src/index.ts\""
   },
