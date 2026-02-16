@@ -28,6 +28,17 @@ export function HeroSection() {
       <section className="relative overflow-hidden bg-gradient-to-br from-teal-50 via-aqua-50 to-teal-100 py-16 sm:py-20 lg:py-24">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#0d948810_1px,transparent_1px),linear-gradient(to_bottom,#0d948810_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Logo Display */}
+          <div className="mx-auto mb-8 max-w-[200px]">
+            <Image
+              src="/images/logo-web.png"
+              alt="254 Convex Communication"
+              width={200}
+              height={80}
+              className="w-full h-auto object-contain"
+              priority
+            />
+          </div>
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               Powering Smart Commerce & Enterprise Solutions
