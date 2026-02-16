@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from 'framer-motion'; 
@@ -18,6 +18,9 @@ const partners = [
   { name: 'Xiaomi', logo: '/images/partners/xiaomi.png', category: 'Smart Home' },
   { name: 'Anker', logo: '/images/partners/anker.png', category: 'Accessories' },
 ]
+
+// Duplicate partners for seamless infinite scroll
+const duplicatedPartners = [...partners, ...partners, ...partners];
 
 export function HeroSection() {
   const [isPaused, setIsPaused] = useState(false);
@@ -64,8 +67,12 @@ export function HeroSection() {
         </div>
       </section>
 
-      {/* Tiled & Swipable Partners Section */}
-      <section className="bg-slate-900 py-16 border-b relative overflow-hidden">
+      {/* Animated Partners Section */}
+      <section 
+        className="bg-slate-900 py-16 border-b relative overflow-hidden"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="inline-block px-4 py-1.5 rounded-full bg-teal-500/10 text-teal-400 text-xs font-bold mb-3 border border-teal-500/20 shadow-sm">
@@ -74,27 +81,41 @@ export function HeroSection() {
             <h3 className="text-3xl font-bold text-white tracking-tight">Trusted Industry Leaders</h3>
           </div>
           
-          <div className="relative">
-            {/* The Swipable Grid Track */}
-            <motion.div 
-              className="flex gap-6 cursor-grab active:cursor-grabbing px-4"
-              drag="x" // Enables horizontal dragging
-              dragConstraints={{ right: 0, left: -1200 }} // Limits drag range to keep tiles in view
-              whileTap={{ cursor: "grabbing" }}
+          {/* Infinite Scroll Animation */}
+          <div className="relative overflow-hidden">
+            {/* Gradient Masks */}
+            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-slate-900 to-transparent z-10" />
+            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-slate-900 to-transparent z-10" />
+            
+            {/* Scrolling Track */}
+            <motion.div
+              className="flex gap-6"
+              animate={{ x: [0, -50 * partners.length * 20] }}
+              transition={{
+                x: {
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  duration: isPaused ? 0 : 30,
+                  ease: "linear",
+                },
+              }}
+              style={{
+                width: "fit-content",
+              }}
             >
-              {partners.map((partner, index) => (
+              {duplicatedPartners.map((partner, index) => (
                 <motion.div
                   key={`${partner.name}-${index}`}
-                  className="flex-shrink-0 w-[280px] sm:w-[320px] select-none group"
-                  whileHover={{ y: -8 }} // Snappy hover lift
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }} // Physics-based motion
+                  className="flex-shrink-0 w-[280px] sm:w-[300px] select-none group"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 >
-                  <div className="h-48 relative flex flex-col items-center justify-center p-8 rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-xl group-hover:border-teal-500/40 group-hover:bg-slate-800 transition-all duration-300">
+                  <div className="h-40 relative flex flex-col items-center justify-center p-6 rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-xl group-hover:border-teal-500/40 group-hover:bg-slate-800 transition-all duration-300">
                     {/* Background Glow Effect */}
                     <div className="absolute inset-0 bg-teal-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-500" />
                     
                     {/* Logo Wrapper */}
-                    <div className="relative h-16 w-32 grayscale group-hover:grayscale-0 transition-all duration-500 mb-4">
+                    <div className="relative h-14 w-28 grayscale group-hover:grayscale-0 transition-all duration-500">
                       <Image
                         src={partner.logo}
                         alt={partner.name}
@@ -103,24 +124,21 @@ export function HeroSection() {
                       />
                     </div>
                     
-                    {/* Metadata for Tiled Layout */}
-                    <p className="text-slate-400 text-sm font-medium group-hover:text-teal-400 transition-colors">
+                    {/* Metadata */}
+                    <p className="text-slate-400 text-sm font-medium group-hover:text-teal-400 transition-colors mt-3">
                       {partner.name}
                     </p>
-                    <span className="text-[10px] text-slate-500 uppercase tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {partner.category}
-                    </span>
                   </div>
                 </motion.div>
               ))}
             </motion.div>
           </div>
           
-          {/* Scroll Indicator (Instructional UI) */}
-          <div className="flex justify-center mt-10 gap-3">
-             <div className="h-1.5 w-12 rounded-full bg-teal-500" />
-             <div className="h-1.5 w-12 rounded-full bg-slate-800" />
-             <div className="h-1.5 w-12 rounded-full bg-slate-800" />
+          {/* Play/Pause Indicator */}
+          <div className="flex justify-center mt-8">
+            <span className={`text-xs px-3 py-1 rounded-full ${isPaused ? 'bg-teal-500 text-white' : 'bg-slate-700 text-slate-400'} transition-colors`}>
+              {isPaused ? '⏸ Paused - Hover to pause' : '▶ Auto-scrolling'}
+            </span>
           </div>
         </div>
       </section>
