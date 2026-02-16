@@ -116,7 +116,7 @@ export function HeroSection() {
             </motion.div>
           </div>
           
-          {/* Scroll Indicators (Instructional UI) */}
+          {/* Scroll Indicator (Instructional UI) */}
           <div className="flex justify-center mt-10 gap-3">
              <div className="h-1.5 w-12 rounded-full bg-teal-500" />
              <div className="h-1.5 w-12 rounded-full bg-slate-800" />
