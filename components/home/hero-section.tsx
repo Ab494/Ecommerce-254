@@ -69,7 +69,7 @@ export function HeroSection() {
               Powering Smart Commerce & Enterprise Solutions
             </h1>
             <p className="mt-6 text-pretty text-lg text-muted-foreground sm:text-xl">
-              Electronics, CCTV Surveillance, Home Appliances, Office Equipment & VAS Services — delivered professionally to businesses across Kenya.
+              Electronics, CCTV Surveillance, Home Appliances, Office Equipment & VAS Services delivered professionally to businesses across Kenya.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" className="gap-2 px-8" asChild>

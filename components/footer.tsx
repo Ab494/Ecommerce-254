@@ -23,7 +23,7 @@ export function Footer() {
               </div>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Technology-driven ecommerce supplier serving businesses across Kenya.
+              Technology driven ecommerce supplier serving businesses across Kenya.
             </p>
           </div>
 
