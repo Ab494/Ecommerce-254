@@ -71,7 +71,7 @@ export default function AboutPage() {
                   alt="254 Convex Comm LTD Logo"
                   width={600}
                   height={1200}
-                  className="max-w-lg h-auto rounded-2xl shadow-lg border border-muted bg-transparent"
+                  className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg h-auto rounded-2xl shadow-lg border border-muted"
                   unoptimized
                 />
               </div>
