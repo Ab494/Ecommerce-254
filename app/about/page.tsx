@@ -39,7 +39,7 @@ export default function AboutPage() {
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
               <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-                About 254 Convex Comm LTD
+                About 254 Convex Communication LTD
               </h1>
               <p className="mt-4 text-pretty text-lg text-muted-foreground">
                 Your peace of mind is our priority
@@ -67,11 +67,12 @@ export default function AboutPage() {
               </div>
               <div className="flex justify-center">
                 <Image
-                  src="/images/logo-web.png"
+                  src="/images/header-logo1.png"
                   alt="254 Convex Comm LTD Logo"
-                  width={400}
-                  height={400}
-                  className="max-w-sm"
+                  width={600}
+                  height={1200}
+                  className="max-w-lg h-auto rounded-2xl shadow-lg border border-muted bg-transparent"
+                  unoptimized
                 />
               </div>
             </div>

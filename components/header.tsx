@@ -23,15 +23,15 @@ export function Header() {
   const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/images/header-logo.jpeg"
+            src="/images/header-logo.png"
             alt="254 Convex Comm LTD"
-            width={64}
+            width={84}
             height={64}
-            className="h-14 w-auto"
+            className="h-16 w-auto rounded-lg"
           />
           <div className="hidden sm:block">
             <p className="text-sm font-bold text-foreground"></p>
