@@ -27,15 +27,15 @@ export function Header() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/images/logo-brandmark.png"
+            src="/images/header-logo.jpeg"
             alt="254 Convex Comm LTD"
-            width={48}
-            height={48}
-            className="h-10 w-auto"
+            width={64}
+            height={64}
+            className="h-14 w-auto"
           />
           <div className="hidden sm:block">
-            <p className="text-sm font-bold text-foreground">254 Convex Comm LTD</p>
-            <p className="text-xs text-muted-foreground">Your peace of mind is our priority</p>
+            <p className="text-sm font-bold text-foreground"></p>
+            <p className="text-xs text-muted-foreground"></p>
           </div>
         </Link>
 

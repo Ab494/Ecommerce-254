@@ -76,7 +76,7 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 text-primary mt-0.5" />
-                <span>Jivern Bharat Building 5th Flr along Harambee Avenue, Nairobi</span>
+                <span>Jiveern Bharat Building 5th Flr along Harambee Avenue, Nairobi</span>
               </li>
             </ul>
             <Button className="mt-4 gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white" asChild>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from 'framer-motion'; 
+import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button"
 import { ArrowRight, FileText } from "lucide-react"
 
@@ -19,11 +19,44 @@ const partners = [
   { name: 'Anker', logo: '/images/partners/anker.png', category: 'Accessories' },
 ]
 
-// Duplicate partners for seamless infinite scroll
-const duplicatedPartners = [...partners, ...partners, ...partners];
+// Animation variants for staggered entrance - one after another
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.3,
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: {
+    opacity: 0,
+    y: 50,
+    scale: 0.8
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.6
+    }
+  }
+}
 
 export function HeroSection() {
   const [isPaused, setIsPaused] = useState(false);
+  const [animationComplete, setAnimationComplete] = useState(false);
+
+  // Trigger animation after component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimationComplete(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <>
@@ -31,17 +64,6 @@ export function HeroSection() {
       <section className="relative overflow-hidden bg-gradient-to-br from-teal-50 via-aqua-50 to-teal-100 py-16 sm:py-20 lg:py-24">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#0d948810_1px,transparent_1px),linear-gradient(to_bottom,#0d948810_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Logo Display */}
-          <div className="mx-auto mb-8 max-w-[200px]">
-            <Image
-              src="/images/logo-web.png"
-              alt="254 Convex Communication"
-              width={200}
-              height={80}
-              className="w-full h-auto object-contain"
-              priority
-            />
-          </div>
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               Powering Smart Commerce & Enterprise Solutions
@@ -67,11 +89,9 @@ export function HeroSection() {
         </div>
       </section>
 
-      {/* Animated Partners Section */}
-      <section 
+      {/* Animated Partners Section - Staggered One After Another */}
+      <section
         className="bg-slate-900 py-16 border-b relative overflow-hidden"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -81,40 +101,20 @@ export function HeroSection() {
             <h3 className="text-3xl font-bold text-white tracking-tight">Trusted Industry Leaders</h3>
           </div>
           
-          {/* Infinite Scroll Animation */}
-          <div className="relative overflow-hidden">
-            {/* Gradient Masks */}
-            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-slate-900 to-transparent z-10" />
-            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-slate-900 to-transparent z-10" />
-            
-            {/* Scrolling Track */}
-            <motion.div
-              className="flex gap-6"
-              animate={{ x: [0, -50 * partners.length * 20] }}
-              transition={{
-                x: {
-                  repeat: Infinity,
-                  repeatType: "loop",
-                  duration: isPaused ? 0 : 30,
-                  ease: "linear",
-                },
-              }}
-              style={{
-                width: "fit-content",
-              }}
-            >
-              {duplicatedPartners.map((partner, index) => (
-                <motion.div
-                  key={`${partner.name}-${index}`}
-                  className="flex-shrink-0 w-[280px] sm:w-[300px] select-none group"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          {/* Scrolling Partners - Duplicate for seamless loop */}
+          <div className="overflow-hidden">
+            <div className="flex animate-scroll gap-6">
+              {/* First set of partners */}
+              {partners.map((partner, index) => (
+                <div
+                  key={`first-${partner.name}`}
+                  className="flex-shrink-0 group animate-fade-in-up"
+                  style={{
+                    animationDelay: `${index * 0.15}s`
+                  }}
                 >
-                  <div className="h-40 relative flex flex-col items-center justify-center p-6 rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-xl group-hover:border-teal-500/40 group-hover:bg-slate-800 transition-all duration-300">
-                    {/* Background Glow Effect */}
+                  <div className="w-48 h-40 relative flex flex-col items-center justify-center p-6 rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-xl group-hover:border-teal-500/40 group-hover:bg-slate-800 transition-all duration-300">
                     <div className="absolute inset-0 bg-teal-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-500" />
-                    
-                    {/* Logo Wrapper */}
                     <div className="relative h-14 w-28 grayscale group-hover:grayscale-0 transition-all duration-500">
                       <Image
                         src={partner.logo}
@@ -123,22 +123,44 @@ export function HeroSection() {
                         className="object-contain pointer-events-none"
                       />
                     </div>
-                    
-                    {/* Metadata */}
                     <p className="text-slate-400 text-sm font-medium group-hover:text-teal-400 transition-colors mt-3">
                       {partner.name}
                     </p>
+                    <span className="text-[10px] text-slate-500 uppercase tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {partner.category}
+                    </span>
                   </div>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
-          </div>
-          
-          {/* Play/Pause Indicator */}
-          <div className="flex justify-center mt-8">
-            <span className={`text-xs px-3 py-1 rounded-full ${isPaused ? 'bg-teal-500 text-white' : 'bg-slate-700 text-slate-400'} transition-colors`}>
-              {isPaused ? '⏸ Paused - Hover to pause' : '▶ Auto-scrolling'}
-            </span>
+              {/* Duplicate for seamless scroll */}
+              {partners.map((partner, index) => (
+                <div
+                  key={`second-${partner.name}`}
+                  className="flex-shrink-0 group animate-fade-in-up"
+                  style={{
+                    animationDelay: `${(partners.length + index) * 0.15}s`
+                  }}
+                >
+                  <div className="w-48 h-40 relative flex flex-col items-center justify-center p-6 rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-xl group-hover:border-teal-500/40 group-hover:bg-slate-800 transition-all duration-300">
+                    <div className="absolute inset-0 bg-teal-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-500" />
+                    <div className="relative h-14 w-28 grayscale group-hover:grayscale-0 transition-all duration-500">
+                      <Image
+                        src={partner.logo}
+                        alt={partner.name}
+                        fill
+                        className="object-contain pointer-events-none"
+                      />
+                    </div>
+                    <p className="text-slate-400 text-sm font-medium group-hover:text-teal-400 transition-colors mt-3">
+                      {partner.name}
+                    </p>
+                    <span className="text-[10px] text-slate-500 uppercase tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {partner.category}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
