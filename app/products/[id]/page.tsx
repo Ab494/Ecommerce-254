@@ -144,14 +144,8 @@ export default function ProductDetailPage() {
   // Get all images for gallery
   const getAllImages = (): string[] => {
     if (!product) return [];
-    const images: string[] = [];
-    if (product.image) images.push(product.image);
-    if (product.images) {
-      product.images.forEach((img: string) => {
-        if (!images.includes(img)) images.push(img);
-      });
-    }
-    return images;
+    // Use images array directly - duplicates are handled on save
+    return product.images || [];
   };
 
   if (loading) {

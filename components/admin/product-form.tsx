@@ -116,13 +116,14 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
 
       const data = await response.json();
       
-      // Add new images to existing ones
+      // Add new images to existing ones (avoid duplicates)
       const newUrls = data.files.map((f: any) => f.url);
       
       setFormData(prev => {
-        const updatedImages = [...(prev.image ? [prev.image, ...prev.images] : prev.images), ...newUrls];
-        // Remove duplicates
-        const uniqueImages = [...new Set(updatedImages)];
+        // Use a Set to remove duplicates, but maintain order
+        const existingImages = prev.images || [];
+        const allImages = [...existingImages, ...newUrls];
+        const uniqueImages = [...new Set(allImages)];
         return {
           ...prev,
           images: uniqueImages,
@@ -224,6 +225,9 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
         },
         body: JSON.stringify({
           ...formData,
+          // Only send unique images - remove the separate image field to avoid duplication
+          image: formData.images[0] || '',
+          images: [...new Set(formData.images)],
           price: parseFloat(formData.price),
           stock: parseInt(formData.stock),
           discountPercent: parseFloat(formData.discountPercent) || 0,
@@ -577,14 +581,17 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
               </div>
 
               {/* Image Actions */}
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex flex-col gap-2">
                 {formData.images.map((img: string, index: number) => (
-                  <div key={index} className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded text-xs">
-                    <span className="truncate max-w-[100px]">{img.split('/').pop()}</span>
+                  <div key={index} className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded text-xs">
+                    <span className="w-6 h-6 flex-shrink-0 bg-slate-200 rounded flex items-center justify-center text-[10px]">
+                      {index + 1}
+                    </span>
+                    <span className="truncate flex-1 min-w-0" title={img.split('/').pop()}>{img.split('/').pop()}</span>
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 flex-shrink-0"
                     >
                       ×
                     </button>
