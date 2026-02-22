@@ -271,7 +271,7 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-card p-6 rounded-lg border">
+    <form onSubmit={handleSubmit} className="space-y-4 bg-card p-4 sm:p-6 rounded-lg border">
       <h2 className="text-xl font-bold">{initialData ? 'Edit Product' : 'Add New Product'}</h2>
 
       {error && (

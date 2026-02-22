@@ -111,22 +111,22 @@ function AdminDashboardContent() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">Admin Dashboard</h1>
-            <p className="text-muted-foreground">Manage your products and orders</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-1 sm:mb-2">Admin Dashboard</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Manage your products and orders</p>
           </div>
           <Button
             variant="outline"
             onClick={handleLogout}
-            className="border-slate-300"
+            className="border-slate-300 w-full sm:w-auto"
           >
             Logout
           </Button>
         </div>
 
-        <div className="flex gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-6">
           <Button
             variant={activeTab === 'products' ? 'default' : 'outline'}
             onClick={() => setActiveTab('products')}
@@ -145,14 +145,14 @@ function AdminDashboardContent() {
           {activeTab === 'products' ? (
             <>
               <BulkImport />
-              <div className="bg-card border rounded-lg p-6">
-                <h2 className="text-2xl font-bold mb-6">Products Catalogue</h2>
+              <div className="bg-card border rounded-lg p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Products Catalogue</h2>
                 <ProductsList />
               </div>
             </>
           ) : (
-            <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-2xl font-bold mb-6">Orders Management</h2>
+            <div className="bg-card border rounded-lg p-4 sm:p-6">
+              <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Orders Management</h2>
               {loadingOrders ? (
                 <p>Loading orders...</p>
               ) : (
