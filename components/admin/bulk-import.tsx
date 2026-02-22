@@ -302,7 +302,7 @@ export default function BulkImport() {
   };
 
   return (
-    <div className="bg-card border rounded-lg p-6">
+    <div className="bg-card border rounded-lg p-4 sm:p-6">
       <div className="mb-4">
         <h3 className="text-lg font-semibold mb-2">Bulk Import Brother Products</h3>
         <p className="text-sm text-muted-foreground mb-4">
