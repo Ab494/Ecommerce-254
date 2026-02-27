@@ -1,8 +1,58 @@
 import { Router, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
+import axios from 'axios';
 
 const router = Router();
+
+// Product Schema (for stock reduction)
+const productSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    price: { type: Number, required: true },
+    stock: { type: Number, default: 0, min: 0 },
+    variants: [{
+      color: String,
+      stock: { type: Number, default: 0 }
+    }]
+  },
+  { timestamps: true }
+);
+
+const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
+
+// Get company configuration from environment
+const COMPANY_NAME = process.env.COMPANY_NAME || '254 Convex Communication LTD';
+const COMPANY_PHONE = process.env.COMPANY_PHONE || '+254790287003';
+const OWNER_WHATSAPP = process.env.OWNER_WHATSAPP || '+254790287003';
+
+// Send invoice via email (helper function)
+async function sendInvoiceEmail(order: any): Promise<void> {
+  try {
+    const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+    await axios.post(`${BACKEND_URL}/api/invoices/send-invoice/${order._id}`, {}, { timeout: 10000 });
+    console.log('✅ Invoice email sent automatically');
+  } catch (error: any) {
+    console.error('❌ Failed to send invoice email:', error.message);
+  }
+}
+
+// Log WhatsApp message for owner notification (manual WhatsApp instead of API)
+function getOwnerNotificationMessage(order: any): string {
+  const itemsList = order.items.map((item: any) => `${item.name} x${item.quantity}`).join('\n');
+  return `NEW ORDER: ${order.orderNumber}\n` +
+    `Customer: ${order.customerName}\n` +
+    `Phone: ${order.customerPhone}\n` +
+    `Items:\n${itemsList}\n` +
+    `Total: KES ${order.totalAmount.toLocaleString()}`;
+}
+
+// Get WhatsApp click-to-chat link for customer
+function getCustomerWhatsAppLink(order: any): string {
+  const message = `Hello ${order.customerName}! Your order *${order.orderNumber}* has been received. Total: KES ${order.totalAmount.toLocaleString()}. Thank you for shopping with ${COMPANY_NAME}!`;
+  const encodedMessage = encodeURIComponent(message);
+  return `https://wa.me/${order.customerPhone.replace(/^\+/, '').replace(/^0/, '254')}?text=${encodedMessage}`;
+}
 
 // Order Schema
 const orderSchema = new mongoose.Schema(
@@ -134,6 +184,16 @@ router.post('/', async (req: Request, res: Response) => {
     });
 
     await order.save();
+    
+    // Send invoice email automatically
+    sendInvoiceEmail(order);
+    
+    // Log owner notification message (owner can then message via WhatsApp click-to-chat)
+    console.log('=== NEW ORDER NOTIFICATION ===');
+    console.log(getOwnerNotificationMessage(order));
+    console.log('Owner WhatsApp: https://wa.me/254790287003');
+    console.log('===============================');
+    
     res.status(201).json(order);
   } catch (error) {
     console.error('Error creating order:', error);

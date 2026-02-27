@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Download, FileText } from 'lucide-react';
+import { Download, FileText, MessageCircle } from 'lucide-react';
 
 interface Order {
   _id: string;
@@ -79,6 +79,8 @@ export default function OrderConfirmationPage() {
 
   const isPayOnDelivery = order.paymentMethod === 'pay_on_delivery';
   const isPendingPayment = order.paymentStatus === 'pending' && !isPayOnDelivery;
+  const isPaymentComplete = order.paymentStatus === 'completed' || order.paymentStatus === 'on_delivery';
+  const showReceipt = isPaymentComplete && order.receiptNumber;
 
   return (
     <main className="min-h-screen bg-background">
@@ -201,17 +203,45 @@ export default function OrderConfirmationPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-wrap">
+            {showReceipt ? (
+              <Button 
+                variant="outline" 
+                className="flex-1 gap-2" 
+                onClick={() => {
+                  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                  window.open(`${API_URL}/api/invoices/generate/${order._id}?format=receipt`, '_blank');
+                }}
+              >
+                <Download className="h-4 w-4" />
+                Download Receipt
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                className="flex-1 gap-2" 
+                onClick={() => {
+                  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                  window.open(`${API_URL}/api/invoices/generate/${order._id}?format=invoice`, '_blank');
+                }}
+              >
+                <FileText className="h-4 w-4" />
+                View Invoice
+              </Button>
+            )}
             <Button 
               variant="outline" 
-              className="flex-1 gap-2" 
-              onClick={() => {
-                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-                window.open(`${API_URL}/api/invoices/generate/${order._id}?format=receipt`, '_blank');
-              }}
+              className="flex-1 gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white border-[#25D366]"
+              asChild
             >
-              <Download className="h-4 w-4" />
-              Download Receipt
+              <a 
+                href={`https://wa.me/254722745703?text=${encodeURIComponent(`Hi, I have a question about my order ${order.orderNumber}`)}`}
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Chat on WhatsApp
+              </a>
             </Button>
             <Link href="/products" className="flex-1">
               <Button variant="outline" className="w-full">

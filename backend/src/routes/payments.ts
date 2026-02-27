@@ -91,6 +91,20 @@ const orderSchema = new mongoose.Schema(
 
 const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
 
+// Product Schema (for stock reduction)
+const productSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    price: { type: Number, required: true },
+    stock: { type: Number, default: 0, min: 0 },
+    variants: [{
+      color: String,
+      stock: { type: Number, default: 0 }
+    }]
+  },
+  { timestamps: true }
+);
+
 // POST initiate STK push
 router.post('/initiate', async (req: Request, res: Response) => {
   try {
@@ -260,6 +274,20 @@ router.post('/callback', async (req: Request, res: Response) => {
         console.log(`Amount: KES ${order.totalAmount.toLocaleString()}`);
         console.log('===============================');
 
+        // Reduce stock for each item in the order
+        try {
+          const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
+          for (const item of order.items) {
+            await Product.findOneAndUpdate(
+              { _id: item.productId },
+              { $inc: { stock: -item.quantity } }
+            );
+          }
+          console.log('✅ Stock reduced for order items');
+        } catch (stockError: any) {
+          console.error('❌ Error reducing stock:', stockError.message);
+        }
+
         // Send payment confirmation email automatically
         try {
           await axios.post(
@@ -278,6 +306,14 @@ router.post('/callback', async (req: Request, res: Response) => {
         } catch (emailError: any) {
           console.error('❌ Failed to send payment confirmation:', emailError.message);
         }
+
+        // Log payment confirmation for WhatsApp (customer can contact via WhatsApp if needed)
+        console.log('=== PAYMENT CONFIRMATION ===');
+        console.log(`Order: ${order.orderNumber}`);
+        console.log(`Customer: ${order.customerName}`);
+        console.log(`Phone: ${order.customerPhone}`);
+        console.log(`WhatsApp: https://wa.me/${order.customerPhone.replace(/^\+/, '').replace(/^0/, '254')}`);
+        console.log('============================');
       } else {
         console.log('Order not found for callback:', CheckoutRequestID);
       }
