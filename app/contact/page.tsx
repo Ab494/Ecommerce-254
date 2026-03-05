@@ -86,7 +86,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">Location</h3>
-                      <p className="mt-1 text-muted-foreground">Jivern Bharat Building 5th Flr along Harambee Avenue, Nairobi</p>
+                      <p className="mt-1 text-muted-foreground">Jiveen Bharat Building 5th Flr along Harambee Avenue, Nairobi</p>
                     </div>
                   </div>
 

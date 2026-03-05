@@ -64,13 +64,6 @@ export default function CheckoutPage() {
       }
       const order = await orderResponse.json();
 
-      // If Pay on Delivery, skip M-Pesa and go to confirmation
-      if (formData.paymentMethod === 'pay_on_delivery') {
-        clearCart();
-        router.push(`/order-confirmation/${order._id}`);
-        return;
-      }
-
       // Initiate M-Pesa payment
       const paymentResponse = await fetch(`${API_URL}/api/payments/initiate`, {
         method: 'POST',
@@ -196,25 +189,11 @@ export default function CheckoutPage() {
                       <p className="text-sm text-muted-foreground">Pay instantly via M-Pesa STK push</p>
                     </div>
                   </label>
-                  <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-accent">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="pay_on_delivery"
-                      checked={formData.paymentMethod === 'pay_on_delivery'}
-                      onChange={handleChange}
-                      className="w-4 h-4"
-                    />
-                    <div className="flex-1">
-                      <span className="font-medium">Pay on Delivery</span>
-                      <p className="text-sm text-muted-foreground">Pay when you receive your order</p>
-                    </div>
-                  </label>
                 </div>
               </div>
 
               <Button type="submit" disabled={loading} className="w-full">
-                {loading ? 'Processing...' : formData.paymentMethod === 'pay_on_delivery' ? 'Place Order' : 'Proceed to Payment'}
+                {loading ? 'Processing...' : 'Proceed to Payment'}
               </Button>
             </form>
           </div>

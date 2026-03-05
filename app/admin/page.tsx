@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import ProductsList from '@/components/admin/products-list';
+import BlogPostsList from '@/components/admin/blog-posts-list';
+import BlogPostForm from '@/components/admin/blog-post-form';
 import BulkImport from '@/components/admin/bulk-import';
 import AdminProtected from '@/components/admin/admin-protected';
 import { Button } from '@/components/ui/button';
@@ -30,7 +32,8 @@ function AdminDashboardContent() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
-  const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'blog'>('products');
+  const [editingBlogPost, setEditingBlogPost] = useState<any>(null);
 
   useEffect(() => {
     if (activeTab === 'orders') {
@@ -139,6 +142,12 @@ function AdminDashboardContent() {
           >
             Orders
           </Button>
+          <Button
+            variant={activeTab === 'blog' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('blog')}
+          >
+            Blog
+          </Button>
         </div>
 
         <div className="grid gap-8">
@@ -150,6 +159,34 @@ function AdminDashboardContent() {
                 <ProductsList />
               </div>
             </>
+          ) : activeTab === 'blog' ? (
+            <div className="bg-card border rounded-lg p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl sm:text-2xl font-bold">Blog Management</h2>
+                <Button onClick={() => setEditingBlogPost({})}>
+                  Create New Post
+                </Button>
+              </div>
+              {editingBlogPost ? (
+                <div>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setEditingBlogPost(null)}
+                    className="mb-4"
+                  >
+                    ← Back to Posts
+                  </Button>
+                  <BlogPostForm 
+                    initialData={editingBlogPost._id ? editingBlogPost : undefined}
+                    onSuccess={() => setEditingBlogPost(null)}
+                  />
+                </div>
+              ) : (
+                <BlogPostsList 
+                  onEdit={(post) => setEditingBlogPost(post)}
+                />
+              )}
+            </div>
           ) : (
             <div className="bg-card border rounded-lg p-4 sm:p-6">
               <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Orders Management</h2>
