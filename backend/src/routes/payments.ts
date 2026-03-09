@@ -307,6 +307,23 @@ router.post('/callback', async (req: Request, res: Response) => {
           console.error('❌ Failed to send payment confirmation:', emailError.message);
         }
 
+        // Send SMS confirmation to customer after payment
+        try {
+          const { sendOrderConfirmation } = await import('../utils/sms');
+          const smsResult = await sendOrderConfirmation(
+            order.customerPhone,
+            order.orderNumber,
+            order.totalAmount
+          );
+          if (smsResult.success) {
+            console.log('✅ Payment confirmation SMS sent:', smsResult.messageId);
+          } else {
+            console.error('❌ Failed to send payment SMS:', smsResult.error);
+          }
+        } catch (smsError: any) {
+          console.error('❌ Error sending payment SMS:', smsError.message);
+        }
+
         // Log payment confirmation for WhatsApp (customer can contact via WhatsApp if needed)
         console.log('=== PAYMENT CONFIRMATION ===');
         console.log(`Order: ${order.orderNumber}`);

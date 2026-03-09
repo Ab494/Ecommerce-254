@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -107,33 +108,50 @@ export default function BlogPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-16">
-        <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-[#ECFDF5]">
+      {/* Hero Section with Video */}
+      <section className="relative overflow-hidden text-white py-24 md:py-32">
+        {/* Background Video */}
+        <div className="absolute inset-0 overflow-hidden">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute w-full h-full object-cover"
+          >
+            <source src="/videos/hero-section.mp4" type="video/mp4" />
+          </video>
+          {/* Dark overlay for readability */}
+          <div className="absolute inset-0 bg-black/60" />
+        </div>
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Blog</h1>
             <p className="text-xl opacity-90">
               Stay updated with the latest news, guides, and stories from our store
             </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Video Section */}
-      <section className="py-8 bg-gray-50">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">See What We Do</h2>
-          <p className="text-muted-foreground mb-8">Quality technology products for every Kenyan business</p>
-          <div className="relative w-full mx-auto rounded-xl overflow-hidden shadow-lg" style={{ aspectRatio: '16/9' }}>
-            <video
-              src="/videos/welcome.mp4"
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="w-full h-full object-cover"
-            />
+            {/* Navigation Links */}
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link 
+                href="/" 
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-sm font-medium transition-colors"
+              >
+                ← Home
+              </Link>
+              <Link 
+                href="/products" 
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-sm font-medium transition-colors"
+              >
+                Products
+              </Link>
+              <Link 
+                href="/contact" 
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-sm font-medium transition-colors"
+              >
+                Contact
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -144,39 +162,51 @@ export default function BlogPage() {
           <div className="container mx-auto px-4">
             <h2 className="text-2xl font-bold mb-6">Featured Posts</h2>
             <div className="grid md:grid-cols-3 gap-6">
-              {featuredPosts.map((post) => (
-                <Link key={post._id} href={`/blog/${post.slug}`} className="group">
-                  <Card className="h-full overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                    {post.featuredImage && (
-                      <div className="relative h-[200px] overflow-hidden">
-                        <Image
-                          src={post.featuredImage}
-                          alt={post.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
+              {featuredPosts.map((post, index) => (
+                <motion.div
+                  key={post._id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="h-full"
+                >
+                  <Link key={post._id} href={`/blog/${post.slug}`} className="group block h-full">
+                    <motion.div
+                      className="h-full bg-white border border-[#D1FAE5] rounded-xl overflow-hidden"
+                      style={{ boxShadow: '0 2px 8px rgba(16, 185, 129, 0.08)' }}
+                      whileHover={{ y: -8, boxShadow: '0 12px 24px rgba(16, 185, 129, 0.15)' }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {post.featuredImage && (
+                        <div className="relative h-[200px] overflow-hidden">
+                          <Image
+                            src={post.featuredImage}
+                            alt={post.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
+                      <div className="p-4">
+                        <Badge className={`w-fit ${getCategoryColor(post.category)}`}>
+                          {post.category}
+                        </Badge>
+                        <h3 className="text-xl font-semibold mt-2 text-foreground group-hover:text-primary transition-colors">
+                          {post.title}
+                        </h3>
+                        <p className="text-muted-foreground line-clamp-2 mt-2">
+                          {post.excerpt}
+                        </p>
+                        <div className="text-sm text-muted-foreground mt-4 flex items-center">
+                          <span>{post.author?.name}</span>
+                          <span className="mx-2">•</span>
+                          <span>{formatDate(post.publishedAt)}</span>
+                        </div>
                       </div>
-                    )}
-                    <CardHeader>
-                      <Badge className={`w-fit ${getCategoryColor(post.category)}`}>
-                        {post.category}
-                      </Badge>
-                      <h3 className="text-xl font-semibold mt-2 text-foreground group-hover:text-primary transition-colors">
-                        {post.title}
-                      </h3>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground line-clamp-2">
-                        {post.excerpt}
-                      </p>
-                    </CardContent>
-                    <CardFooter className="text-sm text-muted-foreground">
-                      <span>{post.author?.name}</span>
-                      <span className="mx-2">•</span>
-                      <span>{formatDate(post.publishedAt)}</span>
-                    </CardFooter>
-                  </Card>
-                </Link>
+                    </motion.div>
+                  </Link>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -248,68 +278,80 @@ export default function BlogPage() {
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 gap-6">
-                  {filteredPosts.map((post) => (
-                    <Link key={post._id} href={`/blog/${post.slug}`} className="group">
-                      <Card className="h-full overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                        {post.featuredImage && (
-                          <div className="relative h-[200px] overflow-hidden">
-                            <Image
-                              src={post.featuredImage}
-                              alt={post.title}
-                              fill
-                              className="object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                          </div>
-                        )}
-                        <CardHeader>
-                          <div className="flex items-center justify-between">
-                            <Badge className={`${getCategoryColor(post.category)}`}>
-                              {post.category}
-                            </Badge>
-                            {post.isFeatured && (
-                              <Badge variant="outline" className="text-yellow-600">
-                                Featured
-                              </Badge>
-                            )}
-                          </div>
-                          <h3 className="text-xl font-semibold mt-2 text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                            {post.title}
-                          </h3>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-muted-foreground line-clamp-3">
-                            {post.excerpt}
-                          </p>
-                          {post.tags && post.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-3">
-                              {post.tags.slice(0, 3).map((tag) => (
-                                <Badge key={tag} variant="secondary" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
+                  {filteredPosts.map((post, index) => (
+                    <motion.div
+                      key={post._id}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      className="h-full"
+                    >
+                      <Link key={post._id} href={`/blog/${post.slug}`} className="group block h-full">
+                        <motion.div
+                          className="h-full bg-white border border-[#D1FAE5] rounded-xl overflow-hidden"
+                          style={{ boxShadow: '0 2px 8px rgba(16, 185, 129, 0.08)' }}
+                          whileHover={{ y: -8, boxShadow: '0 12px 24px rgba(16, 185, 129, 0.15)' }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {post.featuredImage && (
+                            <div className="relative h-[200px] overflow-hidden">
+                              <Image
+                                src={post.featuredImage}
+                                alt={post.title}
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
                             </div>
                           )}
-                        </CardContent>
-                        <CardFooter className="text-sm text-muted-foreground">
-                          <div className="flex items-center gap-2">
-                            {post.author?.avatar && (
-                              <Image
-                                src={post.author.avatar}
-                                alt={post.author.name}
-                                width={24}
-                                height={24}
-                                className="rounded-full"
-                              />
+                          <div className="p-4">
+                            <div className="flex items-center justify-between">
+                              <Badge className={`${getCategoryColor(post.category)}`}>
+                                {post.category}
+                              </Badge>
+                              {post.isFeatured && (
+                                <Badge variant="outline" className="text-yellow-600">
+                                  Featured
+                                </Badge>
+                              )}
+                            </div>
+                            <h3 className="text-xl font-semibold mt-2 text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                              {post.title}
+                            </h3>
+                            <p className="text-muted-foreground line-clamp-3 mt-2">
+                              {post.excerpt}
+                            </p>
+                            {post.tags && post.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-3">
+                                {post.tags.slice(0, 3).map((tag) => (
+                                  <Badge key={tag} variant="secondary" className="text-xs">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
                             )}
-                            <span>{post.author?.name}</span>
+                            <div className="text-sm text-muted-foreground mt-4 flex items-center">
+                              <div className="flex items-center gap-2">
+                                {post.author?.avatar && (
+                                  <Image
+                                    src={post.author.avatar}
+                                    alt={post.author.name}
+                                    width={24}
+                                    height={24}
+                                    className="rounded-full"
+                                  />
+                                )}
+                                <span>{post.author?.name}</span>
+                              </div>
+                              <span className="mx-2">•</span>
+                              <span>{formatDate(post.publishedAt)}</span>
+                              <span className="mx-2">•</span>
+                              <span>{post.views} views</span>
+                            </div>
                           </div>
-                          <span className="mx-2">•</span>
-                          <span>{formatDate(post.publishedAt)}</span>
-                          <span className="mx-2">•</span>
-                          <span>{post.views} views</span>
-                        </CardFooter>
-                      </Card>
-                    </Link>
+                        </motion.div>
+                      </Link>
+                    </motion.div>
                   ))}
                 </div>
               )}

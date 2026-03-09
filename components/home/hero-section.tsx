@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button"
 import { ArrowRight, FileText } from "lucide-react"
 
-// Partner logos - add the actual logo images to public/images/partners/
+// Partner logos
 const partners = [
   { name: 'Vivo', logo: '/images/partners/vivo.png', category: 'Smartphones' },
   { name: 'Tecno', logo: '/images/partners/tecno.png', category: 'Smartphones' },
@@ -19,7 +19,7 @@ const partners = [
   { name: 'Anker', logo: '/images/partners/anker.png', category: 'Accessories' },
 ]
 
-// Animation variants for staggered entrance - one after another
+// Animation variants for staggered entrance
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -50,7 +50,6 @@ export function HeroSection() {
   const [isPaused, setIsPaused] = useState(false);
   const [animationComplete, setAnimationComplete] = useState(false);
 
-  // Trigger animation after component mounts
   useEffect(() => {
     const timer = setTimeout(() => {
       setAnimationComplete(true);
@@ -62,13 +61,26 @@ export function HeroSection() {
     <>
       {/* Hero Content Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-teal-50 via-aqua-50 to-teal-100 py-16 sm:py-20 lg:py-24">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0d948810_1px,transparent_1px),linear-gradient(to_bottom,#0d948810_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30" />
+        {/* Background Video */}
+        <div className="absolute inset-0 overflow-hidden">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute w-full h-full object-cover"
+          >
+            <source src="/videos/hero-section.mp4" type="video/mp4" />
+          </video>
+          {/* Dark overlay for readability */}
+          <div className="absolute inset-0 bg-black/50" />
+        </div>
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+            <h1 className="text-balance text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
               Powering Smart Commerce & Enterprise Solutions
             </h1>
-            <p className="mt-6 text-pretty text-lg text-muted-foreground sm:text-xl">
+            <p className="mt-6 text-pretty text-lg text-white/90 sm:text-xl">
               Electronics, CCTV Surveillance, Home Appliances, Office Equipment & VAS Services delivered professionally to businesses across Kenya.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -78,7 +90,7 @@ export function HeroSection() {
                   Request a Quote
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="gap-2 px-8 bg-transparent" asChild>
+              <Button size="lg" variant="outline" className="gap-2 px-8 bg-transparent text-white border-white hover:bg-white hover:text-black" asChild>
                 <Link href="/products">
                   View Products
                   <ArrowRight className="h-4 w-4" />
@@ -89,7 +101,7 @@ export function HeroSection() {
         </div>
       </section>
 
-      {/* Animated Partners Section - Staggered One After Another */}
+      {/* Partners Section */}
       <section
         className="bg-slate-900 py-16 border-b relative overflow-hidden"
       >
@@ -101,10 +113,9 @@ export function HeroSection() {
             <h3 className="text-3xl font-bold text-white tracking-tight">Trusted Industry Leaders</h3>
           </div>
           
-          {/* Scrolling Partners - Duplicate for seamless loop */}
+          {/* Scrolling Partners */}
           <div className="overflow-hidden">
             <div className="flex animate-scroll gap-6">
-              {/* First set of partners */}
               {partners.map((partner, index) => (
                 <div
                   key={`first-${partner.name}`}

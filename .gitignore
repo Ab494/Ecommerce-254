@@ -24,4 +24,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.tsfrontend-cpanel.zip
+next-env.d.tsfrontend-c-panel.zip
+
+# other projects
+kenya-tech-hub
