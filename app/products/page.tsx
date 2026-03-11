@@ -138,7 +138,24 @@ export default function ProductsListingPage() {
               </div>
             </div>
           ) : (
-            <div className="flex gap-6 overflow-x-auto pb-4 snap-x scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
+            <div className="relative">
+              {/* Scroll Hint */}
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex">
+                <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-full p-2">
+                  <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </div>
+              </div>
+              {/* Right Arrow */}
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex">
+                <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-full p-2">
+                  <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex gap-6 overflow-x-auto pb-4 snap-x scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 px-4 md:px-12">
               {filteredProducts.map((product) => (
                 <Card
                   key={product._id}
@@ -233,6 +250,17 @@ export default function ProductsListingPage() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+            {/* Scroll Hint Text */}
+            <div className="flex items-center justify-center gap-2 mt-4 text-sm text-muted-foreground md:hidden">
+              <svg className="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+              <span>Scroll to see more products</span>
+              <svg className="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </div>
             </div>
           )}
         </div>
