@@ -138,11 +138,11 @@ export default function ProductsListingPage() {
               </div>
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="flex gap-6 overflow-x-auto pb-4 snap-x scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
               {filteredProducts.map((product) => (
                 <Card
                   key={product._id}
-                  className="overflow-hidden transition-all hover:shadow-lg cursor-pointer group"
+                  className="overflow-hidden transition-all hover:shadow-lg cursor-pointer group flex-shrink-0 w-[280px] sm:w-[300px] snap-start"
                   onClick={() => handleProductClick(product._id)}
                 >
                   <div className="aspect-square relative bg-slate-100">
