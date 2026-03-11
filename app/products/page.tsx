@@ -152,7 +152,7 @@ export default function ProductsListingPage() {
                           src={product.image}
                           alt={product.name}
                           fill
-                          className="object-cover transition-transform group-hover:scale-105"
+                          className="object-contain transition-transform group-hover:scale-105"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                         />
                         {/* Multi-image indicator */}

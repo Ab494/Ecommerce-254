@@ -280,7 +280,7 @@ export default function ProductDetailPage() {
                           src={img}
                           alt={`${product.name} - Thumbnail ${index + 1}`}
                           fill
-                          className="object-cover"
+                          className="object-contain"
                         />
                         {/* Thumbnail indicator dots */}
                         {index === selectedImageIndex && (
