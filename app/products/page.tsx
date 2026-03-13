@@ -104,7 +104,7 @@ export default function ProductsListingPage() {
   };
 
   const filteredProducts = selectedCategory === 'all'
-    ? products
+    ? products.slice(0, 8)
     : products.filter(p => p.category === selectedCategory);
 
   return (
@@ -120,9 +120,9 @@ export default function ProductsListingPage() {
           </div>
         </section>
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full px-0 py-8">
           {/* Category Filter */}
-          <div className="mb-8 flex flex-wrap gap-2">
+          <div className="mb-8 flex flex-wrap gap-2 px-4 md:px-8">
             {categories.map((category) => (
               <Button
                 key={category}
@@ -151,11 +151,11 @@ export default function ProductsListingPage() {
               </div>
             </div>
           ) : (
-            <div className="relative">
-              {/* Scroll Hint */}
+            <div className="relative w-full overflow-visible">
+              {/* Left Arrow */}
               <button 
                 onClick={scrollLeft}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center w-10 h-10 bg-white/80 backdrop-blur-sm shadow-lg rounded-full hover:bg-white transition-colors cursor-pointer"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center w-10 h-10 bg-white/80 backdrop-blur-sm shadow-lg rounded-full hover:bg-white transition-colors cursor-pointer"
               >
                 <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -164,20 +164,20 @@ export default function ProductsListingPage() {
               {/* Right Arrow */}
               <button 
                 onClick={scrollRight}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center w-10 h-10 bg-white/80 backdrop-blur-sm shadow-lg rounded-full hover:bg-white transition-colors cursor-pointer"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center w-10 h-10 bg-white/80 backdrop-blur-sm shadow-lg rounded-full hover:bg-white transition-colors cursor-pointer"
               >
                 <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
-              <div ref={scrollRef} className="flex gap-6 overflow-x-auto pb-4 snap-x scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 px-4 md:px-12">
+              <div ref={scrollRef} className="flex gap-2 md:gap-3 overflow-x-auto overflow-y-hidden pb-4 snap-x scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 px-4 md:px-6">
               {filteredProducts.map((product) => (
                 <Card
                   key={product._id}
-                  className="overflow-hidden transition-all hover:shadow-lg cursor-pointer group flex-shrink-0 w-[280px] sm:w-[300px] snap-start"
+                  className="overflow-hidden transition-all hover:shadow-lg cursor-pointer group flex-shrink-0 w-[150px] sm:w-[170px] md:w-[200px] lg:w-[220px]"
                   onClick={() => handleProductClick(product._id)}
                 >
-                  <div className="aspect-square relative bg-slate-100">
+                  <div className="relative h-40 bg-slate-100">
                     {product.image ? (
                       <>
                         <Image
@@ -220,25 +220,25 @@ export default function ProductsListingPage() {
                       </span>
                     </div>
                   </div>
-                  <CardContent className="p-4">
-                    <div className="mb-2 text-xs font-medium text-slate-500 uppercase">
+                  <CardContent className="p-3">
+                    <div className="mb-1 text-xs font-medium text-slate-500 uppercase">
                       {product.category}
                     </div>
-                    <h3 className="mb-2 line-clamp-1 font-semibold text-slate-900 group-hover:text-primary transition-colors">
+                    <h3 className="mb-1 line-clamp-1 text-sm font-semibold text-slate-900 group-hover:text-primary transition-colors">
                       {product.name}
                     </h3>
-                    <p className="mb-3 line-clamp-2 text-sm text-slate-500">
+                    <p className="mb-2 line-clamp-2 text-xs text-slate-500">
                       {product.description}
                     </p>
                     
                     {/* Jumia-style pricing */}
-                    <div className="flex flex-wrap items-baseline gap-2 mb-3">
+                    <div className="flex flex-wrap items-baseline gap-2 mb-2">
                       {product.hasDiscount ? (
                         <>
-                          <span className="text-lg font-bold text-red-600">
+                          <span className="text-sm font-bold text-red-600">
                             {formatCurrency(product.finalPrice || product.price)}
                           </span>
-                          <span className="text-sm text-slate-400 line-through">
+                          <span className="text-xs text-slate-400 line-through">
                             {formatCurrency(product.originalPrice || product.price)}
                           </span>
                           <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded font-medium">
@@ -246,7 +246,7 @@ export default function ProductsListingPage() {
                           </span>
                         </>
                       ) : (
-                        <span className="text-lg font-bold text-slate-900">
+                        <span className="text-sm font-bold text-slate-900">
                           {formatCurrency(product.price)}
                         </span>
                       )}
@@ -257,7 +257,7 @@ export default function ProductsListingPage() {
                         size="sm"
                         onClick={(e) => handleAddToCart(product, e)}
                         disabled={product.stock === 0}
-                        className="bg-slate-900 hover:bg-slate-800"
+                        className="bg-slate-900 hover:bg-slate-800 py-1.5 px-3 text-xs"
                       >
                         {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
                       </Button>
@@ -265,16 +265,6 @@ export default function ProductsListingPage() {
                   </CardContent>
                 </Card>
               ))}
-            </div>
-            {/* Scroll Hint Text */}
-            <div className="flex items-center justify-center gap-2 mt-4 text-sm text-muted-foreground md:hidden">
-              <svg className="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-              <span>Scroll to see more products</span>
-              <svg className="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
             </div>
             </div>
           )}
