@@ -233,9 +233,6 @@ export default function ProductsListingPage() {
                     <h3 className="mb-1 line-clamp-1 text-sm font-semibold text-slate-900 group-hover:text-primary transition-colors">
                       {product.name}
                     </h3>
-                    <p className="mb-2 line-clamp-2 text-xs text-slate-500">
-                      {product.description}
-                    </p>
                     
                     {/* Jumia-style pricing */}
                     <div className="flex flex-wrap items-baseline gap-2 mb-2">
