@@ -140,6 +140,15 @@
   animation: fade-in-up 0.6s ease-out forwards;
 }
 
+/* Hide scrollbar for products horizontal scroll on mobile */
+.products-scroll::-webkit-scrollbar {
+  display: none;
+}
+.products-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .animate-scroll {
   animation: scroll 20s linear infinite;
 }

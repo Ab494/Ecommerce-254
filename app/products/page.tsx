@@ -157,7 +157,7 @@ export default function ProductsListingPage() {
               </div>
             </div>
           ) : (
-            <div className="relative w-full overflow-visible">
+            <div className="relative w-full px-2 md:px-4">
               {/* Left Arrow */}
               <button 
                 onClick={scrollLeft}
@@ -176,14 +176,15 @@ export default function ProductsListingPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
-              <div ref={scrollRef} className="flex gap-2 md:gap-3 overflow-x-auto overflow-y-hidden pb-4 snap-x scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 px-4 md:px-6">
+              {/* Mobile: horizontal scroll | Desktop: horizontal scroll with arrows */}
+              <div ref={scrollRef} className="products-scroll flex gap-3 overflow-x-auto overflow-y-hidden pb-4 snap-x scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 px-4 md:px-8 pr-8">
               {filteredProducts.map((product) => (
                 <Card
                   key={product._id}
-                  className="overflow-hidden transition-all hover:shadow-lg cursor-pointer group flex-shrink-0 w-[150px] sm:w-[170px] md:w-[200px] lg:w-[220px]"
+                  className="overflow-hidden transition-all hover:shadow-lg cursor-pointer group flex-shrink-0 w-[160px] md:w-[180px] lg:w-[200px]"
                   onClick={() => handleProductClick(product._id)}
                 >
-                  <div className="relative h-40 bg-slate-100">
+                  <div className="relative h-36 md:h-40 bg-slate-100">
                     {product.image ? (
                       <>
                         <Image
