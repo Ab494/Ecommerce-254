@@ -41,6 +41,7 @@ export default function ProductsListingPage() {
 
   const categories = [
     'all',
+    'top',
     'Electronics',
     'CCTV Surveillance',
     'Home Appliances',
@@ -104,7 +105,9 @@ export default function ProductsListingPage() {
   };
 
   const filteredProducts = selectedCategory === 'all'
-    ? products.slice(0, 8)
+    ? products
+    : selectedCategory === 'top'
+    ? (categories.filter(c => c !== 'all' && c !== 'top').map((cat: string) => products.find(p => p.category === cat)).filter(Boolean) as Product[])
     : products.filter(p => p.category === selectedCategory);
 
   return (
@@ -134,7 +137,7 @@ export default function ProductsListingPage() {
                     : 'border-slate-300 text-slate-700 hover:bg-slate-100'
                 }`}
               >
-                {category === 'all' ? 'All Products' : category}
+                {category === 'all' ? 'All Products' : category === 'top' ? 'Top Categories' : category}
               </Button>
             ))}
           </div>
