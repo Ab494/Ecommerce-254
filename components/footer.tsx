@@ -12,13 +12,13 @@ export function Footer() {
             <Link href="/" className="flex items-center gap-3">
               <Image
                 src="/images/logo-brandmark.png"
-                alt="254 Convex Comm LTD"
+                alt="254 Convex Communication LTD"
                 width={40}
                 height={40}
                 className="h-10 w-auto"
               />
               <div>
-                <p className="text-sm font-bold text-foreground">254 Convex Comm LTD</p>
+                <p className="text-sm font-bold text-foreground">254 Convex Communication LTD</p>
                 <p className="text-xs text-muted-foreground">Your peace of mind is our priority</p>
               </div>
             </Link>
@@ -76,7 +76,7 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 text-primary mt-0.5" />
-                <span>Jiveern Bharat Building 5th Flr along Harambee Avenue, Nairobi</span>
+                <span>Jeevan Bharat Building 5th Flr along Harambee Avenue, Nairobi</span>
               </li>
             </ul>
             <Button className="mt-4 gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white" asChild>
@@ -90,7 +90,7 @@ export function Footer() {
 
         <div className="mt-12 border-t border-border pt-8">
           <p className="text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} 254 Convex Comm LTD. All rights reserved.
+            &copy; {new Date().getFullYear()} 254 Convex Communication LTD. All rights reserved.
           </p>
         </div>
       </div>
