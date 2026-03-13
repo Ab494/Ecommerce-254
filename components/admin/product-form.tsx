@@ -422,8 +422,11 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
           >
             <option>Electronics</option>
             <option>CCTV Surveillance</option>
-            <option>Home Appliances</option>
+            <option>Appliances</option>
             <option>Office Equipment</option>
+            <option>Phones & Accessories</option>
+            <option>Computers & Accessories</option>
+            <option>Other</option>
           </select>
         </div>
         <div>

@@ -44,8 +44,11 @@ export default function ProductsListingPage() {
     'top',
     'Electronics',
     'CCTV Surveillance',
-    'Home Appliances',
+    'Appliances',
     'Office Equipment',
+    'Phones & Accessories',
+    'Computers & Accessories',
+    'Other',
   ];
 
   useEffect(() => {
