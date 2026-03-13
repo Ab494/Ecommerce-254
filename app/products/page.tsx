@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Card, CardContent } from '@/components/ui/card';
@@ -37,6 +37,7 @@ export default function ProductsListingPage() {
   const { addItem } = useCart();
   const { toast } = useToast();
   const router = useRouter();
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const categories = [
     'all',
@@ -90,6 +91,18 @@ export default function ProductsListingPage() {
     router.push(`/products/${productId}`);
   };
 
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+    }
+  };
+
   const filteredProducts = selectedCategory === 'all'
     ? products
     : products.filter(p => p.category === selectedCategory);
@@ -140,22 +153,24 @@ export default function ProductsListingPage() {
           ) : (
             <div className="relative">
               {/* Scroll Hint */}
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex">
-                <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-full p-2">
-                  <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </div>
-              </div>
+              <button 
+                onClick={scrollLeft}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center w-10 h-10 bg-white/80 backdrop-blur-sm shadow-lg rounded-full hover:bg-white transition-colors cursor-pointer"
+              >
+                <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
               {/* Right Arrow */}
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex">
-                <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-full p-2">
-                  <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
-              <div className="flex gap-6 overflow-x-auto pb-4 snap-x scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 px-4 md:px-12">
+              <button 
+                onClick={scrollRight}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center w-10 h-10 bg-white/80 backdrop-blur-sm shadow-lg rounded-full hover:bg-white transition-colors cursor-pointer"
+              >
+                <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              <div ref={scrollRef} className="flex gap-6 overflow-x-auto pb-4 snap-x scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 px-4 md:px-12">
               {filteredProducts.map((product) => (
                 <Card
                   key={product._id}
