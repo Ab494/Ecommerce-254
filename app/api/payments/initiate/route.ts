@@ -26,8 +26,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initiate STK push
-    const stkResponse = await initiateSTKPush(phoneNumber, amount, orderId);
+    // Initiate STK push with account reference (max 12 characters for Safaricom)
+    const shortOrderNum = order.orderNumber.replace('ORD-', '').slice(-8); // Get last 8 digits
+    const accountReference = `CVX${shortOrderNum}`;
+    const stkResponse = await initiateSTKPush(phoneNumber, amount, accountReference);
 
     // Store the checkout request ID in the order
     await Order.findByIdAndUpdate(orderId, {
