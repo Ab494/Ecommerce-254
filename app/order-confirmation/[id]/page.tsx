@@ -94,14 +94,22 @@ export default function OrderConfirmationPage() {
               </svg>
             </div>
             <h1 className="text-3xl font-bold mb-2">
-              {isPendingPayment ? 'Payment Pending' : isPayOnDelivery ? 'Order Placed!' : 'Payment Successful!'}
+              {order.paymentStatus === 'failed' 
+                ? 'Payment Failed' 
+                : isPendingPayment 
+                  ? 'Payment Pending' 
+                  : isPayOnDelivery 
+                    ? 'Order Placed!' 
+                    : 'Payment Successful!'}
             </h1>
             <p className="text-muted-foreground">
-              {isPendingPayment 
-                ? 'Please complete the M-Pesa payment to confirm your order'
-                : isPayOnDelivery 
-                  ? 'Your order has been placed. You will pay on delivery.'
-                  : 'Thank you for your purchase!'}
+              {order.paymentStatus === 'failed'
+                ? 'There was an issue with your payment. Please try again or contact support.'
+                : isPendingPayment 
+                  ? 'Please complete the M-Pesa payment to confirm your order'
+                  : isPayOnDelivery 
+                    ? 'Your order has been placed. You will pay on delivery.'
+                    : 'Thank you for your purchase!'}
             </p>
           </div>
 
