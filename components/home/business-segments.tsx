@@ -21,8 +21,8 @@ const segments = [
   },
   {
     icon: Home,
-    title: "Home Appliances",
-    description: "Quality appliances for offices and homes — from refrigerators to microwaves.",
+    title: "Appliances",
+    description: "Quality appliances for offices and homes from refrigerators to microwaves.",
     color: "from-emerald-500/20",
     iconColor: "text-emerald-600",
   },

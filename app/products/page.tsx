@@ -181,7 +181,7 @@ export default function ProductsListingPage() {
               {filteredProducts.map((product) => (
                 <Card
                   key={product._id}
-                  className="overflow-hidden transition-all hover:shadow-lg cursor-pointer group flex-shrink-0 w-[160px] md:w-[180px] lg:w-[200px]"
+                  className="overflow-hidden transition-all hover:shadow-lg cursor-pointer group flex-shrink-0 w-[180px] md:w-[180px] lg:w-[200px]"
                   onClick={() => handleProductClick(product._id)}
                 >
                   <div className="relative h-36 md:h-40 bg-slate-100">
