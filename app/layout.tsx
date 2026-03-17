@@ -11,8 +11,55 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: '254 Convex Comm LTD | Your Peace of Mind is Our Priority',
-  description: 'Technology-driven ecommerce supplier serving businesses in Kenya. Electronics, CCTV Surveillance, Home Appliances & Office Equipment delivered professionally.',
+  metadataBase: new URL('https://254convex.co.ke'),
+  title: {
+    default: '254 Convex Communication Ltd | Electronics, CCTV & Appliances in Kenya',
+    template: '%s | 254 Convex Comm Ltd'
+  },
+  description: 'Leading technology-driven ecommerce supplier in Kenya. Shop electronics, CCTV surveillance systems, home appliances & office equipment with delivery across Kenya.',
+  keywords: ['electronics Kenya', 'CCTV cameras Kenya', 'home appliances Kenya', 'office equipment Kenya', 'online shopping Kenya', '254 Convex', 'tech supplier Kenya'],
+  authors: [{ name: '254 Convex Communication Ltd' }],
+  creator: '254 Convex Communication Ltd',
+  publisher: '254 Convex Communication Ltd',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_KE',
+    url: 'https://254convex.co.ke',
+    siteName: '254 Convex Communication Ltd',
+    title: '254 Convex Communication Ltd | Electronics, CCTV & Appliances in Kenya',
+    description: 'Leading technology-driven ecommerce supplier in Kenya. Shop electronics, CCTV surveillance systems, home appliances & office equipment.',
+    images: [
+      {
+        url: '/images/logo-web.png',
+        width: 1200,
+        height: 630,
+        alt: '254 Convex Communication Ltd - Technology Solutions in Kenya'
+      }
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '254 Convex Communication Ltd | Electronics, CCTV & Appliances in Kenya',
+    description: 'Leading technology-driven ecommerce supplier in Kenya. Shop electronics, CCTV surveillance systems, home appliances & office equipment.',
+    images: ['/images/logo-web.png'],
+    creator: '@254Convex',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   generator: 'v0.app',
   icons: {
     icon: [
