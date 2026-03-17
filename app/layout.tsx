@@ -11,7 +11,7 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://254convex.co.ke'),
+  metadataBase: new URL('https://254convexcomltd.co.ke'),
   title: {
     default: '254 Convex Communication Ltd | Electronics, CCTV & Appliances in Kenya',
     template: '%s | 254 Convex Comm Ltd'

@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin/', '/api/', '/checkout/', '/cart/'],
     },
-    sitemap: 'https://254convex.co.ke/sitemap.xml',
+    sitemap: 'https://254convexcomltd.co.ke/sitemap.xml',
   }
 }
