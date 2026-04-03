@@ -78,7 +78,7 @@ const productSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['Electronics', 'CCTV Surveillance', 'Home Appliances', 'Office Equipment'],
+      enum: ['Phones & Accessories', 'Computers & Accessories', 'CCTV Surveillance', 'Appliances', 'Office Equipment', 'Other'],
       required: true,
     },
     image: {
@@ -434,14 +434,25 @@ router.put('/:id', async (req: Request, res: Response) => {
 // DELETE product
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) {
+    const { id } = req.params;
+    const deletedProduct = await Product.findByIdAndDelete(id);
+    if (!deletedProduct) {
       return res.status(404).json({ error: 'Product not found' });
     }
-    res.json({ message: 'Product deleted successfully' });
+    res.json({ message: 'Product deleted successfully', product: deletedProduct });
   } catch (error) {
     console.error('Error deleting product:', error);
     res.status(500).json({ error: 'Failed to delete product' });
+  }
+});
+
+router.delete('/delete/all', async (req: Request, res: Response) => {
+  try {
+    const result = await Product.deleteMany({});
+    res.json({ message: 'All products deleted successfully', count: result.deletedCount });
+  } catch (error) {
+    console.error('Error deleting products:', error);
+    res.status(500).json({ error: 'Failed to delete products' });
   }
 });
 
@@ -454,15 +465,59 @@ router.post('/bulk-import', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Products array is required' });
     }
 
-    const results = await Product.insertMany(products, { ordered: false });
+    console.log('Received products:', products.length);
+
+    // Transform products to match schema
+    const transformedProducts = products.map((product: any) => {
+      // Map old fields to new schema fields
+      const price = product.priceIncVAT || product.price || 0;
+      const stock = product.availability === 'No Stock' ? 0 : 
+                    product.availability === 'In Stock' ? 50 : 
+                    product.availability === 'New' ? 25 : 10;
+      
+      // Create description based on product type
+      let description = `High-quality ${product.name} from Brother. `;
+      if (product.category === 'INK BOTTLE') {
+        description += 'Original ink bottle for Brother printers. Exceptional print quality and reliability.';
+      } else if (product.category === 'DRUM') {
+        description += 'Genuine Brother drum unit. Ensures sharp prints and long-lasting performance.';
+      } else if (product.category === 'TONER') {
+        description += 'Original Brother toner cartridge. High yield with consistent quality.';
+      } else if (product.category === 'INK TANK PRINTER') {
+        description += 'Brother Ink Tank Printer. High-volume printing with low cost per page.';
+      } else if (product.category === 'LASER PRINTER') {
+        description += 'Brother Laser Printer. Fast, reliable printing for your business needs.';
+      }
+      
+      return {
+        name: product.name,
+        description: description.trim(),
+        price: price,
+        category: 'Office Equipment', // All Brother products are office equipment
+        image: product.image || '/images/products/brother-ink-bottle.jpg',
+        images: [product.image || '/images/products/brother-ink-bottle.jpg'],
+        stock: stock,
+        sku: product.code,
+        featured: false,
+        hasVariants: false,
+        variants: [],
+      };
+    });
+
+    console.log('Transformed products:', transformedProducts.length);
+
+    // Use insertMany with ordered: true to see errors
+    const results = await Product.insertMany(transformedProducts, { ordered: true });
+    console.log('Inserted results:', results.length);
     res.status(201).json({ 
       message: 'Products imported successfully',
       count: results.length,
       products: results
     });
-  } catch (error) {
-    console.error('Error importing products:', error);
-    res.status(500).json({ error: 'Failed to import products' });
+  } catch (error: any) {
+    console.error('Error importing products:', error.message);
+    console.error('Error details:', error.errors);
+    res.status(500).json({ error: 'Failed to import products: ' + error.message });
   }
 });
 
