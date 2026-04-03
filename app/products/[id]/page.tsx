@@ -55,11 +55,13 @@ export default function ProductDetailPage() {
       return;
     }
 
-    const API_URL = 'http://localhost:3001';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '') || '';
+    const baseUrl = API_URL || '';
+    console.log('Product detail API_URL:', API_URL || '/');
 
     Promise.all([
-      fetch(`${API_URL}/api/products/${id}`).then(res => res.json()),
-      fetch(`${API_URL}/api/products`).then(res => res.json())
+      fetch(`${baseUrl}/api/products/${id}`).then(res => res.json()),
+      fetch(`${baseUrl}/api/products`).then(res => res.json())
     ])
       .then(([productData, allProducts]) => {
         setProduct(productData);
