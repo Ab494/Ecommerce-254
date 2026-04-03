@@ -5,10 +5,16 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/dbconay0k/**',
+      },
+    ],
   },
-  // Environment variables available to the browser
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://ecommerce-254.onrender.com',
+    NEXT_PUBLIC_API_URL: 'http://localhost:3001',
   },
 }
 

@@ -62,7 +62,7 @@ const productSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['Electronics', 'CCTV Surveillance', 'Home Appliances', 'Office Equipment'],
+      enum: ['Phones & Accessories', 'Computers & Accessories', 'CCTV Surveillance', 'Appliances', 'Office Equipment', 'Other'],
       required: true,
     },
     image: {

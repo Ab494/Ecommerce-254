@@ -7,8 +7,8 @@ import { Smartphone, Video, Home, MessageCircle, ArrowRight } from "lucide-react
 const segments = [
   {
     icon: Smartphone,
-    title: "Electronics",
-    description: "Phones, tablets, laptops, and accessories from leading brands for your business needs.",
+    title: "Phones & Accessories",
+    description: "Latest smartphones, tablets, and accessories from leading brands for your business needs.",
     color: "from-blue-500/20",
     iconColor: "text-blue-600",
   },

@@ -38,22 +38,43 @@ function mapCategory(category: string): string {
     'CAMERAS': 'CCTV Surveillance',
     'SURVEILLANCE': 'CCTV Surveillance',
     
-    // Electronics
-    'LAPTOP': 'Electronics',
-    'LAPTOPS': 'Electronics',
-    'PHONE': 'Electronics',
-    'PHONES': 'Electronics',
-    'TABLET': 'Electronics',
-    'TABLETS': 'Electronics',
+    // Phones & Accessories
+    'PHONE': 'Phones & Accessories',
+    'PHONES': 'Phones & Accessories',
+    'TABLET': 'Phones & Accessories',
+    'TABLETS': 'Phones & Accessories',
+    'SMARTPHONE': 'Phones & Accessories',
+    'SMARTPHONES': 'Phones & Accessories',
+    'EARPHONE': 'Phones & Accessories',
+    'EARPHONES': 'Phones & Accessories',
+    'HEADPHONE': 'Phones & Accessories',
+    'HEADPHONES': 'Phones & Accessories',
+    'WATCH': 'Phones & Accessories',
+    'WATCHES': 'Phones & Accessories',
+    'SMARTWATCH': 'Phones & Accessories',
     
-    // Home Appliances
-    'APPLIANCE': 'Home Appliances',
-    'APPLIANCES': 'Home Appliances',
-    'FRIDGE': 'Home Appliances',
-    'REFRIGERATOR': 'Home Appliances',
-    'MICROWAVE': 'Home Appliances',
-    'AC': 'Home Appliances',
-    'AIR CONDITIONER': 'Home Appliances',
+    // Computers & Accessories
+    'LAPTOP': 'Computers & Accessories',
+    'LAPTOPS': 'Computers & Accessories',
+    'COMPUTER': 'Computers & Accessories',
+    'COMPUTERS': 'Computers & Accessories',
+    'PC': 'Computers & Accessories',
+    'DESKTOP': 'Computers & Accessories',
+    'MONITOR': 'Computers & Accessories',
+    'KEYBOARD': 'Computers & Accessories',
+    'MOUSE': 'Computers & Accessories',
+    
+    // Appliances
+    'APPLIANCE': 'Appliances',
+    'APPLIANCES': 'Appliances',
+    'FRIDGE': 'Appliances',
+    'REFRIGERATOR': 'Appliances',
+    'MICROWAVE': 'Appliances',
+    'AC': 'Appliances',
+    'AIR CONDITIONER': 'Appliances',
+    'TV': 'Appliances',
+    'TELEVISION': 'Appliances',
+    'SMART TV': 'Appliances',
   };
   
   const normalized = category.toUpperCase().trim();

@@ -20,7 +20,7 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
     name: initialData?.name || '',
     description: initialData?.description || '',
     price: initialData?.price || '',
-    category: initialData?.category || 'Electronics',
+    category: initialData?.category || 'Phones & Accessories',
     stock: initialData?.stock || '',
     sku: initialData?.sku || '',
     image: initialData?.image || '',
@@ -250,7 +250,7 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
         name: '',
         description: '',
         price: '',
-        category: 'Electronics',
+        category: 'Phones & Accessories',
         stock: '',
         sku: '',
         image: '',
@@ -420,12 +420,11 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-md"
           >
-            <option>Electronics</option>
+            <option>Phones & Accessories</option>
+            <option>Computers & Accessories</option>
             <option>CCTV Surveillance</option>
             <option>Appliances</option>
             <option>Office Equipment</option>
-            <option>Phones & Accessories</option>
-            <option>Computers & Accessories</option>
             <option>Other</option>
           </select>
         </div>
