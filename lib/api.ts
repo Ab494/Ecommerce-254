@@ -1,7 +1,7 @@
 // API service for communicating with the backend
 // Replace the internal API routes with external backend calls
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/\/+$/, '') || '';
+const API_BASE_URL = 'https://ecommerce-254.onrender.com';
 
 interface ApiResponse<T> {
   data?: T;
