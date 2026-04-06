@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const API_URL = 'https://ecommerce-254.onrender.com';
       const response = await fetch(`${API_URL}/api/auth/verify`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const API_URL = 'https://ecommerce-254.onrender.com';
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const token = localStorage.getItem('adminToken');
       if (token) {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const API_URL = 'https://ecommerce-254.onrender.com';
         await fetch(`${API_URL}/api/auth/logout`, {
           method: 'POST',
           headers: {
