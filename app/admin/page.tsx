@@ -48,7 +48,7 @@ function AdminDashboardContent() {
 
   const fetchOrders = async () => {
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const API_URL = 'https://ecommerce-254.onrender.com';
       const response = await fetch(`${API_URL}/api/orders`);
       if (!response.ok) throw new Error('Failed to fetch orders');
       const data = await response.json();
@@ -67,7 +67,7 @@ function AdminDashboardContent() {
 
   const sendInvoice = async (orderId: string) => {
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const API_URL = 'https://ecommerce-254.onrender.com';
       const response = await fetch(`${API_URL}/api/invoices/send-invoice/${orderId}`, {
         method: 'POST',
       });
@@ -82,7 +82,7 @@ function AdminDashboardContent() {
 
   const sendReceipt = async (orderId: string) => {
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const API_URL = 'https://ecommerce-254.onrender.com';
       const response = await fetch(`${API_URL}/api/invoices/send-receipt/${orderId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -99,7 +99,7 @@ function AdminDashboardContent() {
 
   const updatePaymentStatus = async (orderId: string, status: string) => {
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const API_URL = 'https://ecommerce-254.onrender.com';
       const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
