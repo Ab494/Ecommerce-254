@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import axios from 'axios';
+import { sendOrderConfirmation } from '../utils/sms';
 
 const router = Router();
 
@@ -187,7 +188,19 @@ router.post('/', async (req: Request, res: Response) => {
     
     // Send invoice email automatically
     sendInvoiceEmail(order);
-    
+
+    // Send order confirmation SMS
+    try {
+      const smsResult = await sendOrderConfirmation(order.customerPhone, order.orderNumber, order.totalAmount);
+      if (smsResult.success) {
+        console.log('✅ Order confirmation SMS sent:', smsResult.messageId);
+      } else {
+        console.error('❌ Failed to send order SMS:', smsResult.error);
+      }
+    } catch (smsError: any) {
+      console.error('❌ Error sending order SMS:', smsError.message);
+    }
+
     // Log owner notification message (owner can then message via WhatsApp click-to-chat)
     console.log('=== NEW ORDER NOTIFICATION ===');
     console.log(getOwnerNotificationMessage(order));
