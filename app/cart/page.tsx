@@ -41,8 +41,8 @@ export default function CartPage() {
     setIsApplyingCoupon(false);
   };
 
-  const shippingCost = total > 5000 ? 0 : 500;
-  const finalTotal = total - discount + shippingCost;
+  const shippingCost = 0;
+  const finalTotal = total - discount;
 
   if (items.length === 0) {
     return (
@@ -186,15 +186,7 @@ export default function CartPage() {
                         <span className="font-medium text-emerald-600">-{formatCurrency(discount)}</span>
                       </div>
                     )}
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-500">Shipping</span>
-                      <span className="font-medium text-slate-900">
-                        {shippingCost === 0 ? <span className="text-emerald-600">Free</span> : formatCurrency(shippingCost)}
-                      </span>
-                    </div>
-                    {shippingCost > 0 && (
-                      <p className="text-xs text-slate-400">Free shipping on orders over KES 5,000</p>
-                    )}
+
                     <div className="border-t border-slate-200 pt-4 mt-2">
                       <div className="flex justify-between items-baseline">
                         <span className="text-sm font-semibold text-slate-900">Total</span>
