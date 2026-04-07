@@ -97,7 +97,7 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
     setError('');
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const API_URL = 'https://ecommerce-254.onrender.com';
       
       // Upload multiple images
       const uploadFormData = new FormData();
@@ -214,7 +214,7 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
     }
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const API_URL = 'https://ecommerce-254.onrender.com';
       const endpoint = initialData ? `${API_URL}/api/products/${initialData._id}` : `${API_URL}/api/products`;
       const method = initialData ? 'PUT' : 'POST';
 

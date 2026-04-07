@@ -26,7 +26,7 @@ export default function ProductsList() {
 
   const fetchProducts = async () => {
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const API_URL = 'https://ecommerce-254.onrender.com';
       const response = await fetch(`${API_URL}/api/products`);
       if (!response.ok) throw new Error('Failed to fetch products');
       const data = await response.json();
@@ -42,7 +42,7 @@ export default function ProductsList() {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const API_URL = 'https://ecommerce-254.onrender.com';
       const response = await fetch(`${API_URL}/api/products/${id}`, {
         method: 'DELETE',
       });
