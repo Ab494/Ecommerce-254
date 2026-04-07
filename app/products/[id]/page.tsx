@@ -55,9 +55,9 @@ export default function ProductDetailPage() {
       return;
     }
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '') || '';
-    const baseUrl = API_URL || '';
-    console.log('Product detail API_URL:', API_URL || '/');
+    const API_URL = 'https://ecommerce-254.onrender.com';
+    const baseUrl = API_URL;
+    console.log('Product detail API_URL:', API_URL);
 
     Promise.all([
       fetch(`${baseUrl}/api/products/${id}`).then(res => res.json()),
