@@ -52,6 +52,30 @@ export default function OrderConfirmationPage() {
     }
   }, [params.id]);
 
+  // Poll for payment status updates when pending
+  useEffect(() => {
+    if (order && order.paymentStatus === 'pending' && order.paymentMethod !== 'pay_on_delivery') {
+      const pollInterval = setInterval(async () => {
+        try {
+          const API_URL = 'https://ecommerce-254.onrender.com';
+          const response = await fetch(`${API_URL}/api/orders/${params.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            setOrder(data);
+            // Stop polling if status changed from pending
+            if (data.paymentStatus !== 'pending') {
+              clearInterval(pollInterval);
+            }
+          }
+        } catch (err) {
+          console.error('Error polling order status:', err);
+        }
+      }, 5000); // Poll every 5 seconds
+
+      return () => clearInterval(pollInterval);
+    }
+  }, [order, params.id]);
+
   if (loading) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
