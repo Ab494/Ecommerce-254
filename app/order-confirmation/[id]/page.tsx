@@ -35,7 +35,7 @@ export default function OrderConfirmationPage() {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const API_URL = 'https://ecommerce-254.onrender.com';
         const response = await fetch(`${API_URL}/api/orders/${params.id}`);
         if (!response.ok) throw new Error('Failed to fetch order');
         const data = await response.json();
@@ -217,7 +217,7 @@ export default function OrderConfirmationPage() {
                 variant="outline" 
                 className="flex-1 gap-2" 
                 onClick={() => {
-                  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                  const API_URL = 'https://ecommerce-254.onrender.com';
                   window.open(`${API_URL}/api/invoices/generate/${order._id}?format=receipt`, '_blank');
                 }}
               >
@@ -229,7 +229,7 @@ export default function OrderConfirmationPage() {
                 variant="outline" 
                 className="flex-1 gap-2" 
                 onClick={() => {
-                  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                  const API_URL = 'https://ecommerce-254.onrender.com';
                   window.open(`${API_URL}/api/invoices/generate/${order._id}?format=invoice`, '_blank');
                 }}
               >
