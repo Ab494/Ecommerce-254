@@ -521,4 +521,60 @@ router.post('/bulk-import', async (req: Request, res: Response) => {
   }
 });
 
+// POST bulk import products (generic - no vendor-specific transform)
+// Expects body: { products: [{ name, description, price, category, image, images?, stock?, sku?, featured?, hasVariants?, variants? }] }
+router.post('/bulk-import-generic', async (req: Request, res: Response) => {
+  try {
+    const { products } = req.body;
+
+    if (!products || !Array.isArray(products)) {
+      return res.status(400).json({ error: 'Products array is required' });
+    }
+
+    console.log('Received products (generic):', products.length);
+
+    const transformedProducts = products.map((product: any) => ({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      category: product.category || 'Other',
+      image: product.image || '/images/products/placeholder.jpg',
+      images: product.images || (product.image ? [product.image] : []),
+      stock: product.stock ?? 0,
+      sku: product.sku || generateUniqueSKU(),
+      featured: product.featured || false,
+      hasVariants: product.hasVariants || false,
+      variants: product.variants || [],
+    }));
+
+    const missing = transformedProducts
+      .map((p, i) => ({ i, p }))
+      .filter(({ p }) => !p.name || !p.description || p.price == null || !p.category || !p.image);
+
+    if (missing.length > 0) {
+      return res.status(400).json({
+        error: 'Some products are missing required fields',
+        invalidIndexes: missing.map((m) => m.i),
+      });
+    }
+
+    const results = await Product.insertMany(transformedProducts, { ordered: false });
+    console.log('Inserted results (generic):', results.length);
+    res.status(201).json({
+      message: 'Products imported successfully',
+      count: results.length,
+      products: results,
+    });
+  } catch (error: any) {
+    console.error('Error importing products (generic):', error.message);
+    if (error.writeErrors) {
+      console.error('Write errors:', error.writeErrors.map((e: any) => e.errmsg));
+    }
+    res.status(500).json({
+      error: 'Failed to import products: ' + error.message,
+      inserted: error.insertedDocs?.length || 0,
+    });
+  }
+});
+
 export default router;
