@@ -19,6 +19,7 @@ export default function ProductsList() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [inlineEditId, setInlineEditId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProducts();
@@ -56,6 +57,7 @@ export default function ProductsList() {
   const handleFormSuccess = () => {
     setShowForm(false);
     setEditingProduct(null);
+    setInlineEditId(null);
     fetchProducts();
   };
 
@@ -107,13 +109,19 @@ export default function ProductsList() {
                 <td className="p-2 text-center space-x-2">
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant={inlineEditId === product._id ? 'default' : 'outline'}
                     onClick={() => {
-                      setEditingProduct(product);
-                      setShowForm(true);
+                      if (inlineEditId === product._id) {
+                        setInlineEditId(null);
+                        setEditingProduct(null);
+                      } else {
+                        setInlineEditId(product._id);
+                        setEditingProduct(product);
+                        setShowForm(false);
+                      }
                     }}
                   >
-                    Edit
+                    {inlineEditId === product._id ? 'Cancel' : 'Edit'}
                   </Button>
                   <Button
                     size="sm"
@@ -124,6 +132,17 @@ export default function ProductsList() {
                   </Button>
                 </td>
               </tr>
+              {inlineEditId === product._id && (
+                <tr key={product._id + '-edit'}>
+                  <td colSpan={5} className="p-4 bg-muted/30 border-b">
+                    <ProductForm
+                      key={product._id}
+                      onSuccess={handleFormSuccess}
+                      initialData={editingProduct}
+                    />
+                  </td>
+                </tr>
+              )}
             ))}
           </tbody>
         </table>
