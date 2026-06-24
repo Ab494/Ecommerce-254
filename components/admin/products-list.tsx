@@ -63,12 +63,20 @@ export default function ProductsList() {
 
   return (
     <div className="space-y-6">
-      {!showForm ? (
-        <Button onClick={() => setShowForm(true)} className="mb-4">
+      <div className="flex items-center gap-4">
+        <Button onClick={() => { setEditingProduct(null); setShowForm(true); }} className="mb-4">
           Add New Product
         </Button>
-      ) : (
+        {showForm && (
+          <Button variant="ghost" onClick={() => { setShowForm(false); setEditingProduct(null); }} className="mb-4">
+            Cancel
+          </Button>
+        )}
+      </div>
+
+      {showForm && (
         <ProductForm
+          key={editingProduct?._id ?? 'new'}
           onSuccess={handleFormSuccess}
           initialData={editingProduct}
         />
