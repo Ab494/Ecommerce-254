@@ -97,6 +97,7 @@ export default function ProductsList() {
           </thead>
           <tbody>
             {products.map((product) => (
+              <>
               <tr key={product._id} className="border-b hover:bg-muted/50">
                 <td className="p-2 font-medium">{product.name}</td>
                 <td className="p-2">{product.category}</td>
@@ -133,7 +134,7 @@ export default function ProductsList() {
                 </td>
               </tr>
               {inlineEditId === product._id && (
-                <tr key={product._id + '-edit'}>
+                <tr>
                   <td colSpan={5} className="p-4 bg-muted/30 border-b">
                     <ProductForm
                       key={product._id}
@@ -143,6 +144,7 @@ export default function ProductsList() {
                   </td>
                 </tr>
               )}
+              </>
             ))}
           </tbody>
         </table>
