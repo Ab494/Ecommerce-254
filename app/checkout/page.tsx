@@ -32,8 +32,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
-  const API_URL = 'https://ecommerce-254.onrender.com';
-  
+ const API_URL = 'https://ecommerce-254-lye8.onrender.com';  
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
