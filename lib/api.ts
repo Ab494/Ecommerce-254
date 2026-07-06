@@ -1,7 +1,7 @@
 // API service for communicating with the backend
 // Replace the internal API routes with external backend calls
 
-const API_BASE_URL = 'https://ecommerce-254.onrender.com';
+const API_BASE_URL = 'https://ecommerce-254-lye8.onrender.com';
 
 interface ApiResponse<T> {
   data?: T;

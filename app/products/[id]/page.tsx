@@ -55,7 +55,7 @@ export default function ProductDetailPage() {
       return;
     }
 
-    const API_URL = 'https://ecommerce-254.onrender.com';
+    const API_URL = 'https://ecommerce-254-lye8.onrender.com';
     const baseUrl = API_URL;
     console.log('Product detail API_URL:', API_URL);
 

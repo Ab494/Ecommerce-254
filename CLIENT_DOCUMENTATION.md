@@ -141,7 +141,7 @@ These are set in the Render backend environment variables:
 | Service | URL | Purpose |
 |---------|-----|---------|
 | Frontend | `https://[your-vercel-app].vercel.app` | Customer website |
-| Backend | `https://ecommerce-254.onrender.com` | API & admin |
+| Backend | `https://ecommerce-254-lye8.onrender.com` | API & admin |
 
 ---
 
@@ -171,7 +171,7 @@ These are set in the Render backend environment variables:
 ### Frontend (Vercel):
 | Variable | Value |
 |----------|-------|
-| `NEXT_PUBLIC_API_URL` | `https://ecommerce-254.onrender.com` |
+| `NEXT_PUBLIC_API_URL` | `https://ecommerce-254-lye8.onrender.com` |
 
 ### Backend (Render):
 | Variable | Description |

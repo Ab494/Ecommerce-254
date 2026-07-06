@@ -266,7 +266,7 @@ export default function BulkImport() {
   const handleBulkImport = async () => {
     setIsLoading(true);
     try {
-      const API_URL = 'https://ecommerce-254.onrender.com';
+      const API_URL = 'https://ecommerce-254-lye8.onrender.com';
       const response = await fetch(`${API_URL}/api/products/bulk-import`, {
         method: "POST",
         headers: {

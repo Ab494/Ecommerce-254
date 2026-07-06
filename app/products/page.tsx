@@ -78,7 +78,7 @@ export default function ProductsListingPage() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const API_URL = 'https://ecommerce-254.onrender.com';
+      const API_URL = 'https://ecommerce-254-lye8.onrender.com';
       console.log('API_URL:', API_URL);
       const response = await fetch(`${API_URL}/api/products`);
       if (!response.ok) throw new Error('Failed to fetch products');
