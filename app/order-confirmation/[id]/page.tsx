@@ -61,9 +61,8 @@ export default function OrderConfirmationPage() {
           const response = await fetch(`${API_URL}/api/orders/${params.id}`);
           if (response.ok) {
             const data = await response.json();
-            setOrder(data);
-            // Stop polling if status changed from pending
             if (data.paymentStatus !== 'pending') {
+              setOrder(data);
               clearInterval(pollInterval);
             }
           }
@@ -74,7 +73,7 @@ export default function OrderConfirmationPage() {
 
       return () => clearInterval(pollInterval);
     }
-  }, [order, params.id]);
+  }, [order?.paymentStatus, order?.paymentMethod, params.id]);
 
   if (loading) {
     return (
