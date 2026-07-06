@@ -21,8 +21,19 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://www.254convexcomltd.co.ke',
+  'https://254convexcomltd.co.ke',
+];
+
 app.use(cors({
-  origin: true, // Allow all origins for development
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`CORS blocked: ${origin}`));
+  },
   credentials: true,
 }));
 app.use(express.json());
