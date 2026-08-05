@@ -64,94 +64,164 @@ export default function ProductsList() {
   if (loading) return <div className="text-center py-8">Loading products...</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button onClick={() => { setEditingProduct(null); setShowForm(true); }} className="mb-4">
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div>
+          <h2 className="text-3xl font-bold text-foreground">Products Catalogue</h2>
+          <p className="text-sm text-muted-foreground mt-1">Manage your product inventory</p>
+        </div>
+        <Button 
+          onClick={() => { setEditingProduct(null); setShowForm(true); }} 
+          className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow-md transition-all duration-200 h-10 px-6"
+        >
           Add New Product
         </Button>
-        {showForm && (
-          <Button variant="ghost" onClick={() => { setShowForm(false); setEditingProduct(null); }} className="mb-4">
-            Cancel
-          </Button>
-        )}
       </div>
 
       {showForm && (
-        <ProductForm
-          key={editingProduct?._id ?? 'new'}
-          onSuccess={handleFormSuccess}
-          initialData={editingProduct}
-        />
+        <div className="bg-card rounded-xl shadow-lg border border-border p-8 relative">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-2xl font-semibold text-foreground">
+              {editingProduct ? 'Edit Product' : 'Add New Product'}
+            </h3>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => { setShowForm(false); setEditingProduct(null); }}
+              className="h-8 w-8 p-0 hover:bg-muted/80 transition-colors"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </Button>
+          </div>
+          <ProductForm
+            key={editingProduct?._id ?? 'new'}
+            onSuccess={handleFormSuccess}
+            initialData={editingProduct}
+          />
+        </div>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="border-b bg-muted">
-            <tr>
-              <th className="text-left p-2">#</th>
-              <th className="text-left p-2">Product Name</th>
-              <th className="text-left p-2">Category</th>
-              <th className="text-left p-2">Price</th>
-              <th className="text-left p-2">Stock</th>
-              <th className="text-center p-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product, index) => (
-              <>
-              <tr key={product._id} className="border-b hover:bg-muted/50">
-                <td className="p-2 font-medium">{(index + 1).toString().padStart(3, '0')}</td>
-                <td className="p-2 font-medium">{product.name}</td>
-                <td className="p-2">{product.category}</td>
-                <td className="p-2">KES {product.price.toLocaleString()}</td>
-                <td className="p-2">
-                  <span className={product.stock > 0 ? 'text-green-600' : 'text-red-600'}>
-                    {product.stock}
-                  </span>
-                </td>
-                <td className="p-2 text-center space-x-2">
-                  <Button
-                    size="sm"
-                    variant={inlineEditId === product._id ? 'default' : 'outline'}
-                    onClick={() => {
-                      if (inlineEditId === product._id) {
-                        setInlineEditId(null);
-                      } else {
-                        setInlineEditId(product._id);
-                      }
-                    }}
-                  >
-                    {inlineEditId === product._id ? 'Cancel' : 'Edit'}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDelete(product._id)}
-                  >
-                    Delete
-                  </Button>
-                </td>
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-200 hover:shadow-lg">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10 backdrop-blur-sm">
+              <tr>
+                <th className="text-left p-6 text-sm font-semibold text-slate-700">#</th>
+                <th className="text-left p-6 text-sm font-semibold text-slate-700">Product Name</th>
+                <th className="text-left p-6 text-sm font-semibold text-slate-700">Category</th>
+                <th className="text-left p-6 text-sm font-semibold text-slate-700">Price</th>
+                <th className="text-left p-6 text-sm font-semibold text-slate-700">Stock</th>
+                <th className="text-center p-6 text-sm font-semibold text-slate-700">Actions</th>
               </tr>
-              {inlineEditId === product._id && (
-                <tr>
-                  <td colSpan={6} className="p-4 bg-muted/30 border-b">
-                    <ProductForm
-                      key={product._id}
-                      onSuccess={handleFormSuccess}
-                      initialData={product}
-                    />
-                  </td>
-                </tr>
-              )}
-              </>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {products.map((product, index) => (
+                <>
+                  <tr key={product._id} className="hover:bg-slate-50 transition-colors group">
+                    <td className="p-6 text-sm text-slate-600 font-mono">{(index + 1).toString().padStart(3, '0')}</td>
+                    <td className="p-6">
+                      <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                        {product.name}
+                      </div>
+                    </td>
+                    <td className="p-6">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 shadow-sm">
+                        {product.category}
+                      </span>
+                    </td>
+                    <td className="p-6">
+                      <div className="font-semibold text-slate-900">KES {product.price.toLocaleString()}</div>
+                    </td>
+                    <td className="p-6">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border shadow-sm ${product.stock > 0 
+                        ? 'bg-green-50 text-green-700 border-green-200' 
+                        : 'bg-red-50 text-red-700 border-red-200'
+                      }`}
+                      >
+                        {product.stock}
+                      </span>
+                    </td>
+                    <td className="p-6">
+                      <div className="flex items-center justify-center gap-3">
+                        <Button
+                          size="sm"
+                          variant={inlineEditId === product._id ? 'default' : 'outline'}
+                          onClick={() => {
+                            if (inlineEditId === product._id) {
+                              setInlineEditId(null);
+                            } else {
+                              setInlineEditId(product._id);
+                            }
+                          }}
+                          className="h-9 px-4 text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+                        >
+                          {inlineEditId === product._id ? 'Cancel' : 'Edit'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDelete(product._id)}
+                          className="h-9 px-4 text-sm font-medium transition-all duration-200 hover:bg-red-600 hover:scale-105 active:scale-95"
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                  {inlineEditId === product._id && (
+                    <tr>
+                      <td colSpan={6} className="p-0 border-t-0">
+                        <div className="bg-slate-50 p-8 border-t border-slate-200">
+                          <div className="max-w-4xl mx-auto">
+                            <div className="flex items-center justify-between mb-6">
+                              <h4 className="text-xl font-semibold text-slate-900">Edit Product #{index + 1}</h4>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setInlineEditId(null)}
+                                className="h-8 w-8 p-0 hover:bg-muted/80 transition-colors"
+                              >
+                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </Button>
+                            </div>
+                            <ProductForm
+                              key={product._id}
+                              onSuccess={handleFormSuccess}
+                              initialData={product}
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {products.length === 0 && (
-        <div className="text-center py-8 text-muted-foreground">
-          No products yet. Add your first product to get started!
+        <div className="text-center py-20 bg-white rounded-2xl border border-slate-200 transition-all duration-200 hover:shadow-lg">
+          <div className="max-w-md mx-auto px-6">
+            <div className="h-20 w-20 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <svg className="h-10 w-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V7a4 4 0 00-8 0v6M12 17v5m0-5v5m0-5h8m-8 0H4" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-slate-900 mb-3">No products yet</h3>
+            <p className="text-slate-500 mb-8">Add your first product to get started with your inventory</p>
+            <Button 
+              onClick={() => { setEditingProduct(null); setShowForm(true); }} 
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow-md transition-all duration-200 h-11"
+            >
+              Add Your First Product
+            </Button>
+          </div>
         </div>
       )}
     </div>
