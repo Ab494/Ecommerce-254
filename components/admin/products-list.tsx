@@ -88,6 +88,7 @@ export default function ProductsList() {
         <table className="w-full text-sm">
           <thead className="border-b bg-muted">
             <tr>
+              <th className="text-left p-2">#</th>
               <th className="text-left p-2">Product Name</th>
               <th className="text-left p-2">Category</th>
               <th className="text-left p-2">Price</th>
@@ -96,9 +97,10 @@ export default function ProductsList() {
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
+            {products.map((product, index) => (
               <>
               <tr key={product._id} className="border-b hover:bg-muted/50">
+                <td className="p-2 font-medium">{(index + 1).toString().padStart(3, '0')}</td>
                 <td className="p-2 font-medium">{product.name}</td>
                 <td className="p-2">{product.category}</td>
                 <td className="p-2">KES {product.price.toLocaleString()}</td>
@@ -132,7 +134,7 @@ export default function ProductsList() {
               </tr>
               {inlineEditId === product._id && (
                 <tr>
-                  <td colSpan={5} className="p-4 bg-muted/30 border-b">
+                  <td colSpan={6} className="p-4 bg-muted/30 border-b">
                     <ProductForm
                       key={product._id}
                       onSuccess={handleFormSuccess}
