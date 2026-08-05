@@ -114,11 +114,8 @@ export default function ProductsList() {
                     onClick={() => {
                       if (inlineEditId === product._id) {
                         setInlineEditId(null);
-                        setEditingProduct(null);
                       } else {
                         setInlineEditId(product._id);
-                        setEditingProduct(product);
-                        setShowForm(false);
                       }
                     }}
                   >
@@ -139,7 +136,7 @@ export default function ProductsList() {
                     <ProductForm
                       key={product._id}
                       onSuccess={handleFormSuccess}
-                      initialData={editingProduct}
+                      initialData={product}
                     />
                   </td>
                 </tr>
