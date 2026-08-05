@@ -657,8 +657,7 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
                       key={index}
                       type="button"
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${index === selectedImageIndex ? 'border-blue-500' : 'border-transparent'}
-                      }`
+                      className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${index === selectedImageIndex ? 'border-blue-500' : 'border-transparent'}`}
                     >
                       <img
                         src={img || "/placeholder.svg"}
