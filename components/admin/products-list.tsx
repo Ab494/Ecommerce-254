@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import ProductForm from './product-form';
+import { useToast } from '@/hooks/use-toast';
 
 interface Product {
   _id: string;
@@ -20,6 +21,8 @@ export default function ProductsList() {
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [inlineEditId, setInlineEditId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchProducts();
@@ -40,8 +43,10 @@ export default function ProductsList() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+    const product = products.find((p) => p._id === id);
+    if (!confirm(`Are you sure you want to delete "${product?.name ?? 'this product'}"? This action cannot be undone.`)) return;
 
+    setDeletingId(id);
     try {
       const API_URL = 'https://ecommerce-254-lye8.onrender.com';
       const response = await fetch(`${API_URL}/api/products/${id}`, {
@@ -49,8 +54,20 @@ export default function ProductsList() {
       });
       if (!response.ok) throw new Error('Failed to delete product');
       await fetchProducts();
+      toast({
+        title: 'Product deleted',
+        description: `"${product?.name ?? 'Product'}" has been removed from your inventory.`,
+        variant: 'destructive',
+      });
     } catch (error) {
       console.error('Error deleting product:', error);
+      toast({
+        title: 'Delete failed',
+        description: error instanceof Error ? error.message : 'Something went wrong while deleting the product.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -59,6 +76,12 @@ export default function ProductsList() {
     setEditingProduct(null);
     setInlineEditId(null);
     fetchProducts();
+    toast({
+      title: editingProduct ? 'Product updated' : 'Product created',
+      description: editingProduct
+        ? `"${editingProduct.name}" has been updated successfully.`
+        : 'New product has been added to your inventory.',
+    });
   };
 
   if (loading) return <div className="text-center py-8">Loading products...</div>;
@@ -153,19 +176,22 @@ export default function ProductsList() {
                               setInlineEditId(null);
                             } else {
                               setInlineEditId(product._id);
+                              setEditingProduct(product);
+                              setShowForm(false);
                             }
                           }}
                           className="h-9 px-4 text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95"
                         >
-                          {inlineEditId === product._id ? 'Cancel' : 'Edit'}
+                          {inlineEditId === product._id ? 'Cancel Editing' : 'Edit Product'}
                         </Button>
                         <Button
                           size="sm"
                           variant="destructive"
                           onClick={() => handleDelete(product._id)}
-                          className="h-9 px-4 text-sm font-medium transition-all duration-200 hover:bg-red-600 hover:scale-105 active:scale-95"
+                          disabled={deletingId === product._id}
+                          className="h-9 px-4 text-sm font-medium transition-all duration-200 hover:bg-red-600 hover:scale-105 active:scale-95 disabled:opacity-60"
                         >
-                          Delete
+                          {deletingId === product._id ? 'Deleting...' : 'Delete Product'}
                         </Button>
                       </div>
                     </td>
