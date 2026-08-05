@@ -271,356 +271,466 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-card p-4 sm:p-6 rounded-lg border">
-      <h2 className="text-xl font-bold">{initialData ? 'Edit Product' : 'Add New Product'}</h2>
-
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-foreground">Add New Product</h2>
+        <div className="text-sm text-muted-foreground">
+          Product ID: NEW
+        </div>
+      </div>
+      
       {error && (
-        <div className="bg-red-50 text-red-700 p-3 rounded">{error}</div>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm">
+          {error}
+        </div>
       )}
-
-      <div>
-        <label className="block text-sm font-medium mb-1">Product Name</label>
-        <Input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-          placeholder="e.g., Smart TV 55 inch"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1">Description</label>
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          required
-          rows={4}
-          placeholder="Product description..."
-          className="w-full px-3 py-2 border rounded-md"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Price (KES)</label>
-          <Input
-            type="number"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            required
-            step="0.01"
-            placeholder="0.00"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Stock</label>
-          <Input
-            type="number"
-            name="stock"
-            value={formData.stock}
-            onChange={handleChange}
-            required
-            placeholder="0"
-          />
-        </div>
-      </div>
-
-      {/* Discount Section */}
-      <div className="bg-slate-50 rounded-lg p-4 space-y-4">
-        <h3 className="font-medium text-slate-900">Sale / Discount</h3>
-        
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Discount (%)</label>
-            <Input
-              type="number"
-              name="discountPercent"
-              value={formData.discountPercent}
-              onChange={handleChange}
-              min="0"
-              max="99"
-              placeholder="0"
-              className={discountPercent > 0 ? 'border-green-500' : ''}
-            />
-            {validationErrors.discountPercent && (
-              <p className="text-xs text-red-500 mt-1">{validationErrors.discountPercent}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Sale Start</label>
-            <Input
-              type="datetime-local"
-              name="saleStart"
-              value={formData.saleStart}
-              onChange={handleChange}
-              disabled={discountPercent <= 0}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Sale End</label>
-            <Input
-              type="datetime-local"
-              name="saleEnd"
-              value={formData.saleEnd}
-              onChange={handleChange}
-              disabled={discountPercent <= 0}
-            />
-            {validationErrors.saleEnd && (
-              <p className="text-xs text-red-500 mt-1">{validationErrors.saleEnd}</p>
-            )}
-          </div>
-        </div>
-
-        {/* Live Preview */}
-        {price > 0 && (
-          <div className="bg-white rounded-lg p-4 border border-slate-200">
-            <p className="text-sm font-medium text-slate-700 mb-2">Price Preview</p>
-            <div className="flex items-baseline gap-3">
-              <span className="text-2xl font-bold text-green-600">
-                KES {finalPrice.toLocaleString()}
-              </span>
-              {discountPercent > 0 && (
-                <>
-                  <span className="text-lg text-slate-400 line-through">
-                    KES {price.toLocaleString()}
-                  </span>
-                  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                    -{discountPercent}% OFF
-                  </span>
-                </>
+      
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Basic Information Section */}
+        <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+          <h3 className="text-lg font-semibold mb-6 text-foreground">Basic Information</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium mb-2">Product Name</label>
+              <Input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="e.g., Smart TV 55 inch"
+                required
+                className={`h-11 ${validationErrors.name ? 'border-red-500 focus:ring-red-200' : ''}`}
+              />
+              {validationErrors.name && (
+                <p className="text-sm text-red-600 mt-1">{validationErrors.name}</p>
               )}
             </div>
-            {savings > 0 && (
-              <p className="text-sm text-green-600 mt-1">
-                Save KES {savings.toLocaleString()}
-              </p>
-            )}
-            {isSaleActive && (
-              <p className="text-xs text-green-600 mt-2">✓ Sale is active</p>
-            )}
-            {!isSaleActive && discountPercent > 0 && (
-              <p className="text-xs text-yellow-600 mt-2">
-                ⚠ Sale will be active during {formData.saleStart || 'start date'} to {formData.saleEnd || 'end date'}
-              </p>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">SKU</label>
+              <Input
+                type="text"
+                name="sku"
+                value={formData.sku}
+                onChange={handleChange}
+                placeholder="e.g., TV-55-INCH-BLK"
+              />
+            </div>
+          </div>
+          
+          <div className="mt-6">
+            <label className="block text-sm font-medium mb-2">Description</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Describe your product in detail..."
+              required
+              className={`w-full px-3 py-2 border rounded-lg resize-none h-24 transition-colors focus:ring-2 focus:ring-blue-200 focus:border-blue-500 ${validationErrors.description ? 'border-red-500' : 'border-border'}`}
+            />
+            {validationErrors.description && (
+              <p className="text-sm text-red-600 mt-1">{validationErrors.description}</p>
             )}
           </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Category</label>
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md"
-          >
-            <option>Phones & Accessories</option>
-            <option>Computers & Accessories</option>
-            <option>CCTV Surveillance</option>
-            <option>Appliances</option>
-            <option>Office Equipment</option>
-            <option>Other</option>
-          </select>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">SKU</label>
-          <Input
-            type="text"
-            name="sku"
-            value={formData.sku}
-            onChange={handleChange}
-            placeholder="e.g., SKU-001"
-          />
+        
+        {/* Product Details Section */}
+        <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+          <h3 className="text-lg font-semibold mb-6 text-foreground">Product Details</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium mb-2">Price (KES)</label>
+              <Input
+                type="number"
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                required
+                className={`h-11 ${validationErrors.price ? 'border-red-500 focus:ring-red-200' : ''}`}
+              />
+              {validationErrors.price && (
+                <p className="text-sm text-red-600 mt-1">{validationErrors.price}</p>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Stock Quantity</label>
+              <Input
+                type="number"
+                name="stock"
+                value={formData.stock}
+                onChange={handleChange}
+                placeholder="0"
+                min="0"
+                required
+                className={`h-11 ${validationErrors.stock ? 'border-red-500 focus:ring-red-200' : ''}`}
+              />
+              {validationErrors.stock && (
+                <p className="text-sm text-red-600 mt-1">{validationErrors.stock}</p>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Category</label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-border rounded-lg h-11 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors"
+              >
+                <option value="Phones & Accessories">Phones & Accessories</option>
+                <option value="Computers & Accessories">Computers & Accessories</option>
+                <option value="CCTV Surveillance">CCTV Surveillance</option>
+                <option value="Appliances">Appliances</option>
+                <option value="Office Equipment">Office Equipment</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Color Variants Section */}
-      <div className="bg-blue-50 rounded-lg p-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-medium text-slate-900">Color Variants</h3>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={formData.hasVariants}
-              onChange={toggleHasVariants}
-              className="rounded border-gray-300"
-            />
-            <span className="text-sm">Enable variants</span>
-          </label>
-        </div>
-
-        {formData.hasVariants && (
-          <div className="space-y-3">
-            {formData.variants.map((variant: any, index: number) => (
-              <div key={index} className="bg-white rounded-lg p-3 border border-slate-200">
+        
+        {/* Pricing & Discount Section */}
+        <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+          <h3 className="text-lg font-semibold mb-6 text-foreground">Pricing & Discount</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div>
+              <label className="block text-sm font-medium mb-2">Discount (%)</label>
+              <Input
+                type="number"
+                name="discountPercent"
+                value={formData.discountPercent}
+                onChange={handleChange}
+                placeholder="0"
+                min="0"
+                max="99"
+                step="1"
+                className={`h-11 ${validationErrors.discountPercent ? 'border-red-500 focus:ring-red-200' : ''}`}
+              />
+              {validationErrors.discountPercent && (
+                <p className="text-sm text-red-600 mt-1">{validationErrors.discountPercent}</p>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Sale Start (Optional)</label>
+              <Input
+                type="datetime-local"
+                name="saleStart"
+                value={formData.saleStart}
+                onChange={handleChange}
+                className="h-11"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Sale End (Optional)</label>
+              <Input
+                type="datetime-local"
+                name="saleEnd"
+                value={formData.saleEnd}
+                onChange={handleChange}
+                className="h-11"
+              />
+            </div>
+          </div>
+          
+          {/* Price Display */}
+          {(price > 0 || discountPercent > 0) && (
+            <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <div className="text-sm font-medium text-slate-700 mb-2">Price Summary</div>
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex-1">
-                    <label className="block text-xs font-medium mb-1">Color</label>
-                    <select
-                      value={variant.color}
-                      onChange={(e) => updateVariant(index, 'color', e.target.value)}
-                      className="w-full px-2 py-1 border rounded text-sm"
-                    >
-                      {colorOptions.map((color) => (
-                        <option key={color} value={color}>{color}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-xs font-medium mb-1">Price (optional)</label>
-                    <Input
-                      type="number"
-                      value={variant.price}
-                      onChange={(e) => updateVariant(index, 'price', e.target.value)}
-                      placeholder={`Default: ${formData.price || '0'}`}
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-xs font-medium mb-1">Stock</label>
-                    <Input
-                      type="number"
-                      value={variant.stock}
-                      onChange={(e) => updateVariant(index, 'stock', e.target.value)}
-                      placeholder="0"
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeVariant(index)}
-                    className="mt-4 text-red-500 hover:text-red-700 p-1"
-                  >
-                    ×
-                  </button>
+                  <span className={`text-xl font-semibold ${isSaleActive ? 'text-red-600 line-through' : 'text-slate-900'}`}
+                    >KES {price.toLocaleString()}</span>
+                  {isSaleActive && (
+                    <span className="text-2xl font-bold text-green-600">KES {finalPrice.toLocaleString()}</span>
+                  )}
                 </div>
-              </div>
-            ))}
-            
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addVariant}
-              className="w-full"
-            >
-              + Add Color Variant
-            </Button>
-            
-            <p className="text-xs text-muted-foreground">
-              Add variants for different colors (e.g., Black, Cyan, Magenta, Yellow for printer cartridges)
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Product Images Gallery */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Product Images</label>
-        <div className="space-y-3">
-          {/* Image Upload */}
-          <div className="flex gap-2">
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              disabled={uploading}
-              multiple
-              className="flex-1"
-              ref={fileInputRef}
-            />
-            {uploading && <span className="text-sm text-primary">Uploading...</span>}
-          </div>
-          <p className="text-xs text-muted-foreground">Upload multiple images to show different angles</p>
-
-          {/* Image Gallery Preview */}
-          {formData.images.length > 0 && (
-            <div className="space-y-3">
-              {/* Main Image Display */}
-              <div className="relative w-full h-64 bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
-                {formData.images[selectedImageIndex] ? (
-                  <Image
-                    src={formData.images[selectedImageIndex] || "/placeholder.svg"}
-                    alt={`Product view ${selectedImageIndex + 1}`}
-                    fill
-                    className="object-contain"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-muted-foreground">
-                    No image selected
-                  </div>
-                )}
-                <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                  {selectedImageIndex + 1} / {formData.images.length}
+                <div className="text-right">
+                  {isSaleActive && (
+                    <div className="text-sm text-green-600 font-medium">Save KES {savings.toLocaleString()}</div>
+                  )}
+                  {isSaleActive && (
+                    <div className="text-xs text-slate-500">({discountPercent}% OFF)</div>
+                  )}
                 </div>
-              </div>
-
-              {/* Thumbnail Strip */}
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {formData.images.map((img: string, index: number) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                      index === selectedImageIndex ? 'border-primary' : 'border-transparent'
-                    }`}
-                  >
-                    <Image
-                      src={img || "/placeholder.svg"}
-                      alt={`Thumbnail ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-
-              {/* Image Actions */}
-              <div className="flex flex-col gap-2">
-                {formData.images.map((img: string, index: number) => (
-                  <div key={index} className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded text-xs">
-                    <span className="w-6 h-6 flex-shrink-0 bg-slate-200 rounded flex items-center justify-center text-[10px]">
-                      {index + 1}
-                    </span>
-                    <span className="truncate flex-1 min-w-0" title={img.split('/').pop()}>{img.split('/').pop()}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="text-red-500 hover:text-red-700 flex-shrink-0"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
               </div>
             </div>
           )}
-
-          {/* Single URL Input (alternative) */}
-          <div className="pt-2 border-t">
-            <label className="block text-xs font-medium mb-1">Or add image URL directly</label>
-            <Input
-              type="url"
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
-              className="flex-1"
-            />
+        </div>
+        
+        {/* Variants Section */}
+        <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+          <h3 className="text-lg font-semibold mb-6 text-foreground">Product Variants</h3>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-slate-700">Enable Color Variants</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.hasVariants}
+                  onChange={toggleHasVariants}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+            
+            {formData.hasVariants && (
+              <div className="space-y-4">
+                {formData.variants.map((variant, index) => (
+                  <div key={index} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="font-medium text-slate-900">Variant {index + 1}</h4>
+                      <Button
+                        type="button"
+                        onClick={() => removeVariant(index)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Color</label>
+                        <select
+                          value={variant.color}
+                          onChange={(e) => updateVariant(index, 'color', e.target.value)}
+                          className="w-full px-3 py-2 border border-border rounded-lg h-10 focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
+                        >
+                          <option value="Black">Black</option>
+                          <option value="White">White</option>
+                          <option value="Red">Red</option>
+                          <option value="Blue">Blue</option>
+                          <option value="Green">Green</option>
+                          <option value="Yellow">Yellow</option>
+                          <option value="Cyan">Cyan</option>
+                          <option value="Magenta">Magenta</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Price (KES)</label>
+                        <Input
+                          type="number"
+                          value={variant.price}
+                          onChange={(e) => updateVariant(index, 'price', e.target.value)}
+                          placeholder="0"
+                          min="0"
+                          step="0.01"
+                          className="h-10"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Stock</label>
+                        <Input
+                          type="number"
+                          value={variant.stock}
+                          onChange={(e) => updateVariant(index, 'stock', e.target.value)}
+                          placeholder="0"
+                          min="0"
+                          className="h-10"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium mb-1">SKU</label>
+                        <Input
+                          type="text"
+                          value={variant.sku}
+                          onChange={(e) => updateVariant(index, 'sku', e.target.value)}
+                          placeholder="SKU-001"
+                          className="h-10"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                <Button
+                  type="button"
+                  onClick={addVariant}
+                  variant="outline"
+                  className="w-full border-dashed border-2 border-slate-300 hover:border-slate-400 hover:bg-slate-50"
+                >
+                  + Add Another Variant
+                </Button>
+                
+                <p className="text-xs text-muted-foreground">
+                  Add variants for different colors (e.g., Black, Cyan, Magenta, Yellow for printer cartridges)
+                </p>
+              </div>
+            )}
           </div>
         </div>
-      </div>
-
-      <Button type="submit" disabled={loading} className="w-full">
-        {loading ? 'Saving...' : initialData ? 'Update Product' : 'Add Product'}
-      </Button>
-    </form>
+        
+        {/* Product Images Section */}
+        <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-foreground">Product Images</h3>
+          
+          <div className="space-y-4">
+            {/* Image Upload Area */}
+            <div
+              className={`border-2 border-dashed rounded-lg p-8 transition-colors ${isDragging 
+                ? 'border-blue-400 bg-blue-50' 
+                : uploading 
+                ? 'border-slate-300 bg-slate-50' 
+                : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={(e) => handleImageUpload(e.target.files)}
+                accept="image/*"
+                multiple
+                className="hidden"
+                id="image-upload"
+                disabled={uploading}
+              />
+              
+              {uploading ? (
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                  <p className="text-sm text-slate-600">Uploading images...</p>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <svg className="mx-auto h-12 w-12 text-slate-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <h4 className="text-lg font-medium text-slate-700 mb-2">Upload Product Images</h4>
+                  <p className="text-sm text-slate-500 mb-4">Drag and drop images here or click to select files</p>
+                  <Button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
+                  >
+                    Select Images
+                  </Button>
+                  <p className="text-xs text-slate-400 mt-2">PNG, JPG, GIF up to 10MB each</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Image Gallery Preview */}
+            {formData.images.length > 0 && (
+              <div className="space-y-4">
+                {/* Main Image Display */}
+                <div className="relative w-full h-64 bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+                  {formData.images[selectedImageIndex] ? (
+                    <img
+                      src={formData.images[selectedImageIndex] || "/placeholder.svg"}
+                      alt={`Product view ${selectedImageIndex + 1}`}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-muted-foreground">
+                      No image selected
+                    </div>
+                  )}
+                  <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                    {selectedImageIndex + 1} / {formData.images.length}
+                  </div>
+                </div>
+                
+                {/* Thumbnail Strip */}
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {formData.images.map((img, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${index === selectedImageIndex ? 'border-blue-500' : 'border-transparent'}
+                      }`
+                    >
+                      <img
+                        src={img || "/placeholder.svg"}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Image Actions */}
+                <div className="flex flex-col gap-2">
+                  {formData.images.map((img, index) => (
+                    <div key={index} className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded text-xs">
+                      <span className="w-6 h-6 flex-shrink-0 bg-slate-200 rounded flex items-center justify-center text-[10px]">
+                        {index + 1}
+                      </span>
+                      <span className="truncate flex-1 min-w-0" title={img.split('/').pop()}>{img.split('/').pop()}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="text-red-500 hover:text-red-700 flex-shrink-0"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Single URL Input (alternative) */}
+            <div className="pt-2 border-t">
+              <label className="block text-xs font-medium mb-1">Or add image URL directly</label>
+              <Input
+                type="url"
+                name="image"
+                value={formData.image}
+                onChange={handleChange}
+                placeholder="https://example.com/image.jpg"
+                className="flex-1"
+              />
+            </div>
+          </div>
+        </div>
+        
+        {/* Form Actions */}
+        <div className="flex justify-end gap-4 pt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onSuccess?.()}
+            className="px-6"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={loading || uploading}
+            className="px-8 bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Saving...
+              </>
+            ) : (
+              'Save Product'
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }
