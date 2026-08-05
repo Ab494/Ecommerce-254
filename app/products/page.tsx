@@ -54,6 +54,7 @@ export default function ProductsListingPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   const [categoryProducts, setCategoryProducts] = useState<Record<string, Product>>({});
   const { addItem } = useCart();
@@ -130,9 +131,15 @@ export default function ProductsListingPage() {
     }
   };
 
-  const filteredProducts = selectedCategory === 'all'
-    ? products
-    : products.filter(p => p.category === selectedCategory);
+  const filteredProducts = products.filter(p => {
+    const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q || 
+      p.name.toLowerCase().includes(q) || 
+      p.description?.toLowerCase().includes(q) || 
+      p.category.toLowerCase().includes(q);
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -145,6 +152,26 @@ export default function ProductsListingPage() {
             <p className="mt-2 text-slate-400">
               Browse our complete range of products
             </p>
+            <div className="mt-6 max-w-xl relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="w-full px-4 py-3 pl-11 rounded-lg text-slate-900 bg-white border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+              />
+              <svg className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+              </svg>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 text-lg leading-none"
+                >
+                  ×
+                </button>
+              )}
+            </div>
           </div>
         </section>
 
@@ -213,7 +240,9 @@ export default function ProductsListingPage() {
             {/* Products Section Header */}
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-xl font-semibold text-gray-800">
-                {selectedCategory === 'all' ? 'Our Products' : selectedCategory}
+                {searchQuery
+                  ? `Search results for "${searchQuery}" (${filteredProducts.length})`
+                  : selectedCategory === 'all' ? 'Our Products' : selectedCategory}
               </h2>
               <a 
                 className="text-sm text-[#0B3C5D]"
@@ -232,7 +261,7 @@ export default function ProductsListingPage() {
             ) : filteredProducts.length === 0 ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center text-muted-foreground">
-                  No products found in this category.
+                  No products found{searchQuery ? ` for "${searchQuery}"` : " in this category"}.
                 </div>
               </div>
             ) : (
