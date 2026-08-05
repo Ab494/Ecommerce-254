@@ -37,6 +37,7 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
   // Available colors for variants
   const colorOptions = ['Black', 'Cyan', 'Magenta', 'Yellow', 'White', 'Red', 'Blue', 'Green', 'Other'];
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Calculate live preview
@@ -89,8 +90,7 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
     return Object.keys(errors).length === 0;
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+  const handleImageUploadFiles = async (files: FileList) => {
     if (!files || files.length === 0) return;
 
     setUploading(true);
@@ -201,6 +201,25 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
       hasVariants: !prev.hasVariants,
       variants: !prev.hasVariants ? [{ color: 'Black', price: '', stock: '0' }] : [],
     }));
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      await handleImageUploadFiles(files);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -596,7 +615,7 @@ export default function ProductForm({ onSuccess, initialData }: ProductFormProps
               <input
                 type="file"
                 ref={fileInputRef}
-                onChange={(e) => handleImageUpload(e.target.files)}
+                onChange={(e) => { if (e.target.files) handleImageUploadFiles(e.target.files); }}
                 accept="image/*"
                 multiple
                 className="hidden"
