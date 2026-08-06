@@ -21,6 +21,7 @@ export default function ProductsList() {
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [inlineEditId, setInlineEditId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -86,6 +87,11 @@ export default function ProductsList() {
 
   if (loading) return <div className="text-center py-8">Loading products...</div>;
 
+  const filteredProducts = products.filter(p => {
+    const q = searchQuery.toLowerCase();
+    return !q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
+  });
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
@@ -127,7 +133,23 @@ export default function ProductsList() {
       )}
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-200 hover:shadow-lg">
-        <div className="overflow-x-auto">
+        <div className="relative max-w-sm mb-4">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search products..."
+          className="w-full px-4 py-2 pl-9 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+        />
+        <svg className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+        </svg>
+        {searchQuery && (
+          <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1.5 text-slate-400 hover:text-slate-600 text-lg">×</button>
+        )}
+      </div>
+
+      <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10 backdrop-blur-sm">
               <tr>
