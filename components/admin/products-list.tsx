@@ -162,7 +162,7 @@ export default function ProductsList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {products.map((product, index) => (
+              {filteredProducts.map((product, index) => (
                 <>
                   <tr key={product._id} className="hover:bg-slate-50 transition-colors group">
                     <td className="p-6 text-sm text-slate-600 font-mono">{(index + 1).toString().padStart(3, '0')}</td>
