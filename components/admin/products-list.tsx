@@ -253,7 +253,7 @@ export default function ProductsList() {
         </div>
       </div>
 
-      {products.length === 0 && (
+      {filteredProducts.length === 0 && (
         <div className="text-center py-20 bg-white rounded-2xl border border-slate-200 transition-all duration-200 hover:shadow-lg">
           <div className="max-w-md mx-auto px-6">
             <div className="h-20 w-20 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-6 shadow-inner">
