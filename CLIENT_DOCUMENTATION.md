@@ -28,7 +28,7 @@ This is a complete e-commerce website for **254 Convex Communication LTD**, a Ke
 
 ---
 
-## 3. How the System Works
+## 3. How the System Work
 
 ### Customer Flow:
 1. **Browse Products** - Visit the website to view products
