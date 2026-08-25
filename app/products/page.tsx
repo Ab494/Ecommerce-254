@@ -79,6 +79,12 @@ export default function ProductsListingPage() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
+      if (process.env.NEXT_PUBLIC_PRODUCTS_ENABLED === 'false') {
+        setProducts([]);
+        setCategoryProducts({});
+        setLoading(false);
+        return;
+      }
       const API_URL = 'https://ecommerce-254-lye8.onrender.com';
       console.log('API_URL:', API_URL);
       const response = await fetch(`${API_URL}/api/products`);

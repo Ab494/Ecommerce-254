@@ -20,6 +20,7 @@ export const api = {
   // Products
   products: {
     getAll: async (category?: string): Promise<any[]> => {
+      if (process.env.NEXT_PUBLIC_PRODUCTS_ENABLED === 'false') return [];
       const url = category 
         ? `${API_BASE_URL}/api/products?category=${category}`
         : `${API_BASE_URL}/api/products`;
